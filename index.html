@@ -58,21 +58,18 @@
         /* Container da Linha Férrea */
         .railway-container {
             position: relative;
-            width: 90%;
+            width: 95%;
+            /* Aumentado um pouco para aproveitar a tela */
             max-width: 1200px;
-            height: 180px;
-            /* Altura para caber nomes das estações */
+            height: 220px;
             margin-bottom: 60px;
             border: 1px solid #ccc;
             background: #fff;
-            padding: 20px;
+            padding: 20px 0;
+            /* Padding ZERO nas laterais */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-            /* ... */
-            height: 220px;
-            /* Aumentado para dar mais respiro aos nomes inclinados */
-            /* ... */
-
+            overflow: visible;
+            /* Garante que o texto inclinado apareça */
         }
 
         .line-title {
@@ -358,7 +355,7 @@
             { name: "Lontras", km: 85.3 },
             { name: "Matador", km: 91.0 },
             { name: "Rio do Sul", km: 97.8 },
-            { name: "Barra do Trombudo", km: 104.3 }
+            { name: "B. do Trombudo", km: 104.3 }
         ];
 
         // Ramal: Subida é o Km 0 do ramal para visualização. 
