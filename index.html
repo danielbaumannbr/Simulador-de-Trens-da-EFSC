@@ -61,7 +61,6 @@
             box-sizing: border-box;
         }
 
-        /* Posicionamento dos números */
         .n1 { transform: rotate(30deg); } .n1 span { display: block; transform: rotate(-30deg); }
         .n2 { transform: rotate(60deg); } .n2 span { display: block; transform: rotate(-60deg); }
         .n3 { transform: rotate(90deg); } .n3 span { display: block; transform: rotate(-90deg); }
@@ -87,6 +86,7 @@
         .hour-hand { width: 6px; height: 35px; margin-left: -3px; }
         .min-hand { width: 4px; height: 55px; margin-left: -2px; }
         .sec-hand { width: 2px; height: 60px; background-color: #d32f2f; margin-left: -1px; z-index: 6; }
+        
         .clock-center {
             position: absolute; top: 50%; left: 50%;
             width: 10px; height: 10px; background: #000;
@@ -100,7 +100,7 @@
             position: relative;
             width: 95%;
             max-width: 1200px;
-            height: 220px;
+            height: 240px; /* Aumentado para acomodar os nomes inclinados */
             margin-bottom: 60px;
             border: 1px solid #ccc;
             background: #fff;
@@ -115,13 +115,15 @@
         }
 
         .track-line {
-            position: absolute; top: 60%; left: 45px; right: 45px;
+            position: absolute; top: 60%; 
+            left: 80px; /* Margem de segurança para o texto não vazar */
+            right: 80px; 
             height: 4px; background-color: var(--rail-color); border-radius: 2px;
         }
 
         .station {
             position: absolute; top: 60%; transform: translate(-50%, -50%);
-            width: 12px; height: 12px; background-color: var(--bg-color);
+            width: 12px; height: 12px; background-color: #fff;
             border: 3px solid var(--station-color); border-radius: 50%; z-index: 1;
         }
 
@@ -189,8 +191,8 @@
     <div class="status-panel" id="status-msg">Iniciando sistemas...</div>
 
     <div class="legend">
-        <div><span class="dot" style="background: var(--train-asc)"></span>Ascendente (Interior)</div>
-        <div><span class="dot" style="background: var(--train-desc)"></span>Descendente (Blumenau)</div>
+        <div><span class="dot" style="background: var(--train-asc)"></span>Ascendente (Blumenau -> Interior)</div>
+        <div><span class="dot" style="background: var(--train-desc)"></span>Descendente (Interior -> Blumenau)</div>
     </div>
 
     <div class="railway-container" id="main-line-container">
@@ -219,7 +221,7 @@
         </div>
 
         <p><strong>Elaborado por:</strong> Daniel Baumann</p>
-        <a href="http://memoria.bn.gov.br/docreader/882860/2706" target="_blank">Fonte: Hemeroteca Digital Brasileira</a>
+        <a href="https://archive.org/details/horariodosferr00estr/mode/2up" target="_blank">Fonte: Horário dos Trens - EFSC - 1936</a>
     </section>
 
     <script>
@@ -262,7 +264,8 @@
                 const pct = st.km / totalLength;
                 const dot = document.createElement('div');
                 dot.className = 'station';
-                dot.style.left = `calc(45px + (${pct} * (100% - 90px)))`;
+                // Margem de 80px para evitar corte de texto
+                dot.style.left = `calc(80px + (${pct} * (100% - 160px)))`;
                 dot.innerHTML = `<div class="station-label">${st.name}</div><div class="station-km">${st.km.toFixed(1)}</div>`;
                 container.appendChild(dot);
             });
@@ -272,7 +275,6 @@
             const now = new Date();
             const sec = now.getSeconds(), min = now.getMinutes(), hr = now.getHours();
 
-            // Atualiza Relógio Analógico
             document.getElementById('sec-hand').style.transform = `rotate(${(sec / 60) * 360}deg)`;
             document.getElementById('min-hand').style.transform = `rotate(${(min / 60) * 360}deg)`;
             document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 / 12) * 360 + (min / 60) * 30}deg)`;
@@ -297,8 +299,8 @@
                     trainEl.className = `train ${t.dir === -1 ? 'desc' : ''}`;
                     trainEl.innerText = t.id;
                     const posPct = curKm / lineLen;
-                    trainEl.style.left = `calc(45px + (${posPct} * (100% - 90px)))`;
-                    trainEl.setAttribute('data-info', `${t.type} ${t.id} - Km ${curKm.toFixed(1)}`);
+                    // Mesma margem de 80px aplicada aqui
+                    trainEl.style.left = `calc(80px + (${posPct} * (100% - 160px)))`;
                     
                     document.getElementById(t.line === 'main' ? 'main-line-container' : 'branch-line-container').appendChild(trainEl);
                 }
