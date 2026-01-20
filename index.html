@@ -401,34 +401,45 @@
         <div class="line-title">Ramal (Subida - Hammonia)</div>
         <div class="track-line"></div>
     </div>
-    
+
 
     <section class="about-section">
-     <section style="line-height: 1.6; color: #333; max-width: 800px; font-family: sans-serif;">
-    <h2 style="color: #2c3e50;">Sobre o Projeto</h2>
-    
-    <p>
-        Este simulador é fundamentado nos horários oficiais publicados pelo jornal <strong>A Cidade</strong> em 26 de setembro de 1936, refletindo a malha ferroviária da <strong>Estrada de Ferro Santa Catharina (EFSC)</strong> que entrou em vigor em outubro de 1936.
-    </p>
+        <section style="line-height: 1.6; color: #333; max-width: 800px; font-family: sans-serif;">
+            <h2 style="color: #2c3e50;">Sobre o Projeto</h2>
 
-    <div style="background-color: #f9f9f9; border-left: 4px solid #2c3e50; padding: 15px; margin: 20px 0;">
-        <strong>Guia de Tráfego:</strong>
-        <p style="margin: 5px 0;">
-            O horário de pico ocorre principalmente no período da manhã <strong>(06:20 às 11:30)</strong>, quando há maior circulação simultânea de trens diários, cargueiros e composições de domingo em ambos os sentidos. Outro ponto de alta movimentação é no final da tarde <strong>(17:00 às 19:00)</strong>, especialmente na região de <strong>Subida e Rio do Sul</strong>, devido às conexões estratégicas com o Ramal de Hammonia.
-        </p>
-    </div>
+            <p>
+                Este simulador é fundamentado nos horários oficiais publicados pelo jornal <strong>A Cidade</strong> em
+                26 de setembro de 1936, refletindo a malha ferroviária da <strong>Estrada de Ferro Santa Catharina
+                    (EFSC)</strong> que entrou em vigor em outubro de 1936.
+            </p>
 
-    <p style="font-style: italic; font-size: 0.95em; color: #444; background-color: #fff9e6; padding: 10px; border-radius: 4px;">
-        <strong>Nota de Embarque:</strong> Se você abrir o mapa e não encontrar nenhum trem se movimentando, não se preocupe: você está presenciando o silêncio real das trilhas naquela hora específica. Volte em outros horários ou consulte o jornal na Hemeroteca para saber a que horas você deve "embarcar" (risos).
-    </p>
+            <div style="background-color: #f9f9f9; border-left: 4px solid #2c3e50; padding: 15px; margin: 20px 0;">
+                <strong>Guia de Tráfego:</strong>
+                <p style="margin: 5px 0;">
+                    O horário de pico ocorre principalmente no período da manhã <strong>(06:20 às 11:30)</strong>,
+                    quando há maior circulação simultânea de trens diários, cargueiros e composições de domingo em ambos
+                    os sentidos. Outro ponto de alta movimentação é no final da tarde <strong>(17:00 às 19:00)</strong>,
+                    especialmente na região de <strong>Subida e Rio do Sul</strong>, devido às conexões estratégicas com
+                    o Ramal de Hammonia.
+                </p>
+            </div>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p
+                style="font-style: italic; font-size: 0.95em; color: #444; background-color: #fff9e6; padding: 10px; border-radius: 4px;">
+                <strong>Nota de Embarque:</strong> Se você abrir o mapa e não encontrar nenhum trem se movimentando, não
+                se preocupe: você está presenciando o silêncio real das trilhas naquela hora específica. Volte em outros
+                horários ou consulte o jornal na Hemeroteca para saber a que horas você deve "embarcar" (risos).
+            </p>
 
-    <p style="font-size: 0.85em; color: #666; line-height: 1.4;">
-        <em>Atenção: O programa pode apresentar oscilações técnicas ou erros pontuais de funcionamento. O projeto é uma ferramenta de resgate histórico e não possui pretensão de exatidão técnica absoluta.</em><br><br>
-        <strong>Autor:</strong> Daniel Baumann | <strong>Fonte:</strong> Hemeroteca Digital Brasileira.
-    </p>
-</section>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+            <p style="font-size: 0.85em; color: #666; line-height: 1.4;">
+                <em>Atenção: O programa pode apresentar oscilações técnicas ou erros pontuais de funcionamento. O
+                    projeto é uma ferramenta de resgate histórico e não possui pretensão de exatidão técnica
+                    absoluta.</em><br><br>
+                <strong>Autor:</strong> Daniel Baumann | <strong>Fonte:</strong> Hemeroteca Digital Brasileira.
+            </p>
+        </section>
 
         <div class="train-legend-box">
             <div class="train-group type-p">
@@ -498,7 +509,10 @@
             const sec = now.getSeconds(), min = now.getMinutes(), hr = now.getHours();
 
             document.getElementById('sec-hand').style.transform = `rotate(${(sec / 60) * 360}deg)`;
-            document.getElementById('min-hand').style.transform = `rotate(${(min / 60) * 360}deg)`;
+            //document.getElementById('min-hand').style.transform = `rotate(${(min / 60) * 360}deg)`;
+            const minAngle = (min + sec / 60) * 6;
+            document.getElementById('min-hand').style.transform = `rotate(${minAngle}deg)`;
+
             document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 / 12) * 360 + (min / 60) * 30}deg)`;
 
             const curMin = hr * 60 + min + (sec / 60);
