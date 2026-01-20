@@ -67,6 +67,12 @@
             background: #fff;
             padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+            /* ... */
+            height: 220px;
+            /* Aumentado para dar mais respiro aos nomes inclinados */
+            /* ... */
+
         }
 
         .line-title {
@@ -196,6 +202,58 @@
             display: inline-block;
             margin-right: 5px;
         }
+        .about-section {
+            margin-top: 40px;
+            padding: 25px;
+            max-width: 800px;
+            background-color: #eeebe3; /* Tom de papel levemente diferente */
+            border: 2px solid #5d5d5d;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 5px 5px 0px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .about-section h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            border-bottom: 1px solid #999;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .about-section p {
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .about-section a {
+            display: inline-flex;
+            align-items: center;
+            color: #d32f2f; /* Cor do trem ascendente para destaque */
+            text-decoration: none;
+            font-weight: bold;
+            border-bottom: 1px dashed #d32f2f;
+            transition: all 0.3s ease;
+        }
+
+        .about-section a:hover {
+            color: #1976d2; /* Cor do trem descendente no hover */
+            border-bottom: 1px solid #1976d2;
+        }
+
+        /* Pequeno ícone decorativo simulando um prego ou rebite */
+        .about-section::before, .about-section::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #777;
+            border-radius: 50%;
+            top: 10px;
+        }
+        .about-section::before { left: 10px; }
+        .about-section::after { right: 10px; }
     </style>
 </head>
 
@@ -445,6 +503,25 @@
         updateSimulation(); // Rodar imediatamente
 
     </script>
+    <section class="about-section">
+        <h2>Sobre o Projeto</h2>
+        <p>
+            Este simulador reproduz o movimento histórico da <strong>Estrada de Ferro Santa Catharina (EFSC)</strong>.
+            A lógica de posicionamento é processada em tempo real, baseada nos horários oficiais da publicação de
+            <strong>26 de setembro de 1936</strong>.
+        </p>
+        <p>
+            <strong>Elaborado por:</strong> Daniel Baumann
+        </p>
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+        <p style="font-size: 0.85rem; font-style: italic;">
+            Fonte documental:
+            <a href="https://archive.org/details/horariodosferr00estr/mode/2up" target="_blank">
+                "Horário dos Trens - EFSC - 1936"
+            </a>
+            disponível na Hemeroteca Digital Brasileira.
+        </p>
+    </section>
 </body>
 
 </html>
