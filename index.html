@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento EFSC - 1936</title>
+    <style>
+        :root {
+            --bg-color: #f4f1ea;
+            --text-color: #2c2c2c;
+            --rail-color: #555;
+            --station-color: #000;
+            --train-asc: #d32f2f; /* Vermelho para subindo */
+            --train-desc: #1976d2; /* Azul para descendo */
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .clock-display {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            background: #e0ded5;
+            padding: 10px 20px;
+            border: 1px solid #999;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+        }
+
+        .status-panel {
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 0.9rem;
+            max-width: 800px;
+        }
+
+        /* Container da Linha Férrea */
+        .railway-container {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+            height: 180px; /* Altura para caber nomes das estações */
+            margin-bottom: 60px;
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .line-title {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #fff;
+            padding: 0 5px;
+            z-index: 2;
+        }
+
+        /* A linha do trilho */
+        .track-line {
+            position: absolute;
+            top: 60%;
+            left: 5%;
+            width: 90%;
+            height: 4px;
+            background-color: var(--rail-color);
+            border-radius: 2px;
+        }
+
+        /* Estações */
+        .station {
+            position: absolute;
+            top: 60%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background-color: var(--bg-color);
+            border: 3px solid var(--station-color);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .station-label {
+            position: absolute;
+            top: -55px; /* Acima da linha */
+            left: 50%;
+            transform: translateX(-50%) rotate(-45deg);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            transform-origin: bottom center;
+            font-weight: bold;
+        }
+
+        .station-km {
+            position: absolute;
+            top: 15px; /* Abaixo da linha */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        /* O Trem */
+        .train {
+            position: absolute;
+            top: 60%;
+            width: 40px;
+            height: 24px;
+            background: var(--train-asc);
+            color: white;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            transition: left 1s linear;
+            cursor: help;
+        }
+
+        .train.desc {
+            background: var(--train-desc);
+        }
+
+        /* Tooltip do trem */
+        .train::after {
+            content: attr(data-info);
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .train:hover::after {
+            opacity: 1;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            font-size: 0.8rem;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .dot { width: 10px; height: 10px; display: inline-block; margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Estrada de Ferro Santa Catharina</h1>
+    <h2>Horário dos Trens (1936)</h2>
+
+    <div class="clock-display" id="clock">--:--:--</div>
+    <div class="status-panel" id="status-msg">Carregando dados...</div>
+
+    <div class="legend">
+        <div><span class="dot" style="background: var(--train-asc)"></span>Ascendente (Blumenau -> Interior)</div>
+        <div><span class="dot" style="background: var(--train-desc)"></span>Descendente (Interior -> Blumenau)</div>
+    </div>
+
+    <div class="railway-container" id="main-line-container">
+        <div class="line-title">Linha Principal (Blumenau - Barra do Trombudo)</div>
+        <div class="track-line"></div>
+        </div>
+
+    <div class="railway-container" id="branch-line-container">
+        <div class="line-title">Ramal (Subida - Hammonia)</div>
+        <div class="track-line"></div>
+        </div>
+
+<script>
+    // --- DADOS DA TABELA (Baseado na imagem) ---
+    
+    // Distância total da linha principal: 104.3 km
+    const MAIN_LINE_LENGTH = 104.3;
+    
+    // Estações da Linha Principal (Nome e Km)
+    const mainStations = [
+        { name: "Blumenau", km: 0.0 },
+        { name: "Itoupava Secca", km: 2.8 },
+        { name: "Salto Weissbach", km: 8.7 },
+        { name: "Encano", km: 16.9 },
+        { name: "Indayal", km: 22.0 },
+        { name: "Warnow", km: 30.7 },
+        { name: "Riachuelo", km: 38.4 },
+        { name: "Subida", km: 63.1 },
+        { name: "Lontras", km: 85.3 },
+        { name: "Matador", km: 91.0 },
+        { name: "Rio do Sul", km: 97.8 },
+        { name: "Barra do Trombudo", km: 104.3 }
+    ];
+
+    // Ramal: Subida é o Km 0 do ramal para visualização. 
+    // Estimando Hammonia a ~12km baseado no tempo de viagem (22min) comparado à linha principal.
+    const BRANCH_LINE_LENGTH = 12.0; 
+    const branchStations = [
+        { name: "Subida", km: 0.0 },
+        { name: "Hammonia", km: 12.0 } 
+    ];
+
+    // Dias da semana: 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+    // Tipos de dia na tabela: 
+    // "Diario" = [0,1,2,3,4,5,6]
+    // "Domingos" = [0]
+    // "Diario exceto domingos" = [1,2,3,4,5,6]
+
+    const DAYS_DAILY = [0,1,2,3,4,5,6];
+    const DAYS_SUN = [0];
+    const DAYS_WEEKDAY = [1,2,3,4,5,6];
+
+    // Trens (Horários convertidos para minutos desde meia-noite para facilitar cálculo)
+    // Direção 1 = Esquerda->Direita (Ascendente), -1 = Direita->Esquerda (Descendente)
+    const trains = [
+        // --- LINHA PRINCIPAL ASCENDENTE (Blumenau -> Barra) ---
+        { id: "P1", days: DAYS_DAILY, start: "15:00", end: "19:05", dir: 1, line: "main", type: "Passageiro" },
+        { id: "P3", days: DAYS_SUN, start: "06:50", end: "10:54", dir: 1, line: "main", type: "Passageiro" },
+        { id: "M1", days: DAYS_WEEKDAY, start: "06:20", end: "11:32", dir: 1, line: "main", type: "Misto" },
+
+        // --- LINHA PRINCIPAL DESCENDENTE (Barra -> Blumenau) ---
+        { id: "P2", days: DAYS_DAILY, start: "05:02", end: "09:05", dir: -1, line: "main", type: "Passageiro" },
+        { id: "P4", days: DAYS_SUN, start: "14:32", end: "18:35", dir: -1, line: "main", type: "Passageiro" },
+        { id: "M2", days: DAYS_WEEKDAY, start: "06:06", end: "11:09", dir: -1, line: "main", type: "Misto" },
+
+        // --- RAMAL ASCENDENTE (Subida -> Hammonia) ---
+        { id: "PR1", days: DAYS_DAILY, start: "17:22", end: "17:44", dir: 1, line: "branch", type: "Ramal" },
+        { id: "PR3", days: DAYS_SUN, start: "09:11", end: "09:33", dir: 1, line: "branch", type: "Ramal" },
+        { id: "MR1", days: DAYS_WEEKDAY, start: "09:31", end: "09:57", dir: 1, line: "branch", type: "Misto" },
+
+        // --- RAMAL DESCENDENTE (Hammonia -> Subida) ---
+        { id: "PR2", days: DAYS_DAILY, start: "06:20", end: "06:43", dir: -1, line: "branch", type: "Ramal" },
+        { id: "PR4", days: DAYS_SUN, start: "15:50", end: "16:13", dir: -1, line: "branch", type: "Ramal" },
+        { id: "MR2", days: DAYS_WEEKDAY, start: "07:40", end: "08:06", dir: -1, line: "branch", type: "Misto" }
+    ];
+
+    // --- FUNÇÕES AUXILIARES ---
+
+    function timeToMinutes(timeStr) {
+        const [h, m] = timeStr.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function formatTime(date) {
+        return date.toLocaleTimeString('pt-BR', { hour12: false });
+    }
+
+    function getDayType(date) {
+        const day = date.getDay(); // 0 = Dom, 6 = Sab
+        return day;
+    }
+
+    function createStationMarkers(containerId, stations, totalLength) {
+        const container = document.getElementById(containerId);
+        stations.forEach(st => {
+            const pct = (st.km / totalLength) * 90; // Usando 90% da largura (5% padding cada lado)
+            
+            const dot = document.createElement('div');
+            dot.className = 'station';
+            dot.style.left = `calc(5% + ${pct}%)`; // Offset inicial de 5%
+
+            const label = document.createElement('div');
+            label.className = 'station-label';
+            label.innerText = st.name;
+            dot.appendChild(label);
+
+            const km = document.createElement('div');
+            km.className = 'station-km';
+            km.innerText = st.km.toFixed(1);
+            dot.appendChild(km);
+
+            container.appendChild(dot);
+        });
+    }
+
+    function getStationAtKm(km, stations) {
+        // Encontra a estação mais próxima (simples aproximação)
+        let closest = stations[0];
+        let minDiff = Math.abs(km - stations[0].km);
+        
+        for (let i = 1; i < stations.length; i++) {
+            let diff = Math.abs(km - stations[i].km);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = stations[i];
+            }
+        }
+        
+        // Se estiver muito longe da estação (ex: > 2km), considera "Em trânsito"
+        if (minDiff > 2.0) return null;
+        return closest.name;
+    }
+
+    function getPreviousStation(km, stations, dir) {
+        // Retorna a última estação pela qual passou
+        let passed = stations.filter(s => dir === 1 ? s.km <= km : s.km >= km);
+        if (passed.length === 0) return stations[dir === 1 ? 0 : stations.length -1].name;
+        
+        // Ordena para pegar a mais próxima do KM atual
+        passed.sort((a,b) => Math.abs(km - a.km) - Math.abs(km - b.km));
+        return passed[0].name;
+    }
+
+    // --- LÓGICA PRINCIPAL ---
+
+    function updateSimulation() {
+        const now = new Date();
+        document.getElementById('clock').innerText = formatTime(now);
+
+        const currentMinutes = now.getHours() * 60 + now.getMinutes() + (now.getSeconds()/60);
+        const currentDay = getDayType(now);
+        
+        let activeTrainsCount = 0;
+        let msg = `Dia da semana (0=Dom): ${currentDay}. Nenhum trem circulando no momento.`;
+
+        // Limpar trens antigos
+        document.querySelectorAll('.train').forEach(e => e.remove());
+
+        trains.forEach(train => {
+            // 1. Checa se o trem roda hoje
+            if (!train.days.includes(currentDay)) return;
+
+            const startMin = timeToMinutes(train.start);
+            const endMin = timeToMinutes(train.end);
+
+            // 2. Checa se está no horário
+            if (currentMinutes >= startMin && currentMinutes <= endMin) {
+                activeTrainsCount++;
+                
+                // Calcular progresso (0.0 a 1.0)
+                const totalDuration = endMin - startMin;
+                const elapsed = currentMinutes - startMin;
+                let progress = elapsed / totalDuration; // % da viagem no tempo
+                
+                // Mapear para KM
+                const lineLength = train.line === 'main' ? MAIN_LINE_LENGTH : BRANCH_LINE_LENGTH;
+                let currentKm = 0;
+                
+                if (train.dir === 1) {
+                    // Ascendente (0 -> Fim)
+                    currentKm = progress * lineLength;
+                } else {
+                    // Descendente (Fim -> 0)
+                    currentKm = lineLength - (progress * lineLength);
+                }
+
+                // Determinar onde está visualmente (CSS Left %)
+                // A linha visual começa em 5% e termina em 95% (total 90% width útil)
+                const visualPct = (currentKm / lineLength) * 90; 
+                
+                // Criar elemento do trem
+                const trainEl = document.createElement('div');
+                trainEl.className = `train ${train.dir === -1 ? 'desc' : ''}`;
+                trainEl.innerText = train.id;
+                trainEl.style.left = `calc(5% + ${visualPct}%)`;
+                
+                // Informação de Localização
+                const stationsList = train.line === 'main' ? mainStations : branchStations;
+                const nearStation = getStationAtKm(currentKm, stationsList);
+                const prevStation = getPreviousStation(currentKm, stationsList, train.dir);
+                
+                let locText = "";
+                if (nearStation) {
+                    locText = `Parado/Passando em ${nearStation}`;
+                } else {
+                    locText = `Passou por ${prevStation}`;
+                }
+
+                trainEl.setAttribute('data-info', `${train.type} ${train.id}: ${locText} (Km ${currentKm.toFixed(1)})`);
+
+                // Adicionar ao container correto
+                const containerId = train.line === 'main' ? 'main-line-container' : 'branch-line-container';
+                document.getElementById(containerId).appendChild(trainEl);
+            }
+        });
+
+        if (activeTrainsCount > 0) {
+            msg = `${activeTrainsCount} trem(s) em circulação agora.`;
+        }
+        
+        document.getElementById('status-msg').innerText = msg;
+    }
+
+    // --- INICIALIZAÇÃO ---
+
+    createStationMarkers('main-line-container', mainStations, MAIN_LINE_LENGTH);
+    createStationMarkers('branch-line-container', branchStations, BRANCH_LINE_LENGTH);
+
+    // Atualiza a cada segundo
+    setInterval(updateSimulation, 1000);
+    updateSimulation(); // Rodar imediatamente
+
+</script>
+</body>
+</html>
