@@ -202,14 +202,16 @@
             display: inline-block;
             margin-right: 5px;
         }
+
         .about-section {
             margin-top: 40px;
             padding: 25px;
             max-width: 800px;
-            background-color: #eeebe3; /* Tom de papel levemente diferente */
+            background-color: #eeebe3;
+            /* Tom de papel levemente diferente */
             border: 2px solid #5d5d5d;
             border-radius: 4px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 5px 5px 0px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05), 5px 5px 0px rgba(0, 0, 0, 0.1);
             position: relative;
         }
 
@@ -230,7 +232,8 @@
         .about-section a {
             display: inline-flex;
             align-items: center;
-            color: #d32f2f; /* Cor do trem ascendente para destaque */
+            color: #d32f2f;
+            /* Cor do trem ascendente para destaque */
             text-decoration: none;
             font-weight: bold;
             border-bottom: 1px dashed #d32f2f;
@@ -238,12 +241,14 @@
         }
 
         .about-section a:hover {
-            color: #1976d2; /* Cor do trem descendente no hover */
+            color: #1976d2;
+            /* Cor do trem descendente no hover */
             border-bottom: 1px solid #1976d2;
         }
 
         /* Pequeno ícone decorativo simulando um prego ou rebite */
-        .about-section::before, .about-section::after {
+        .about-section::before,
+        .about-section::after {
             content: '';
             position: absolute;
             width: 8px;
@@ -252,8 +257,60 @@
             border-radius: 50%;
             top: 10px;
         }
-        .about-section::before { left: 10px; }
-        .about-section::after { right: 10px; }
+
+        .about-section::before {
+            left: 10px;
+        }
+
+        .about-section::after {
+            right: 10px;
+        }
+
+        .train-legend-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #999;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .train-group {
+            border-left: 4px solid #555;
+            padding-left: 15px;
+        }
+
+        .train-group.type-p {
+            border-color: var(--train-asc);
+        }
+
+        .train-group.type-m {
+            border-color: #555;
+        }
+
+        .train-group h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        .train-item {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .train-desc {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: #555;
+            margin-top: 10px;
+            border-top: 1px dotted #ccc;
+            padding-top: 5px;
+        }
     </style>
 </head>
 
@@ -503,12 +560,27 @@
         updateSimulation(); // Rodar imediatamente
 
     </script>
+    <div class="train-legend-box">
+        <div class="train-group type-p">
+            <h3> Trens P (Passageiros)</h3>
+            <div class="train-item"><span><strong>P1 e P2</strong></span> <span>Diário</span></div>
+            <div class="train-item"><span><strong>P3 e P4</strong></span> <span>Domingos</span></div>
+            <p class="train-desc"> Focados em transporte de passageiros, bagagens e pequenas encomendas.</p>
+        </div>
+
+        <div class="train-group type-m">
+            <h3> Trens M (Mistos)</h3>
+            <div class="train-item"><span><strong>M1 e M2</strong></span> <span>Exceto domingos</span></div>
+            <div class="train-item"><span><strong>MR1 e MR2</strong></span> <span>Misto Ramal</span></div>
+            <p class="train-desc"> Transportam vagões de carga acoplados a carros de passageiros.</p>
+        </div>
+    </div>
     <section class="about-section">
         <h2>Sobre o Projeto</h2>
         <p>
             Este simulador reproduz o movimento histórico da <strong>Estrada de Ferro Santa Catharina (EFSC)</strong>.
             A lógica de posicionamento é processada em tempo real, baseada nos horários oficiais da publicação de
-            <strong>26 de setembro de 1936</strong>.
+            <strong>21 de setembro de 1936</strong>.
         </p>
         <p>
             <strong>Elaborado por:</strong> Daniel Baumann
