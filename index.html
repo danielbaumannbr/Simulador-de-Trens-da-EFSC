@@ -5,20 +5,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento EFSC - 1936</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --bg-color: #f4f1ea;
+            --text-color: #2c2c2c;
+            --rail-color: #555;
+            --station-color: #000;
+            --train-asc: #d32f2f;
+            --train-desc: #1976d2;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1, h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* RELÓGIO ANALÓGICO ESTILO ANOS 30 */
+        .analog-clock {
+            width: 150px;
+            height: 150px;
+            background-color: #fdfaf0;
+            border: 8px solid #333;
+            border-radius: 50%;
+            position: relative;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .clock-face { width: 100%; height: 100%; position: relative; }
+
+        .number {
+            position: absolute;
+            width: 100%; height: 100%;
+            text-align: center;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #222;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Posicionamento dos números */
+        .n1 { transform: rotate(30deg); } .n1 span { display: block; transform: rotate(-30deg); }
+        .n2 { transform: rotate(60deg); } .n2 span { display: block; transform: rotate(-60deg); }
+        .n3 { transform: rotate(90deg); } .n3 span { display: block; transform: rotate(-90deg); }
+        .n4 { transform: rotate(120deg); } .n4 span { display: block; transform: rotate(-120deg); }
+        .n5 { transform: rotate(150deg); } .n5 span { display: block; transform: rotate(-150deg); }
+        .n6 { transform: rotate(180deg); } .n6 span { display: block; transform: rotate(-180deg); }
+        .n7 { transform: rotate(210deg); } .n7 span { display: block; transform: rotate(-210deg); }
+        .n8 { transform: rotate(240deg); } .n8 span { display: block; transform: rotate(-240deg); }
+        .n9 { transform: rotate(270deg); } .n9 span { display: block; transform: rotate(-270deg); }
+        .n10 { transform: rotate(300deg); } .n10 span { display: block; transform: rotate(-300deg); }
+        .n11 { transform: rotate(330deg); } .n11 span { display: block; transform: rotate(-330deg); }
+        .n12 { transform: rotate(0deg); }
+
+        .hand {
+            position: absolute;
+            bottom: 50%; left: 50%;
+            transform-origin: bottom;
+            background-color: #000;
+            border-radius: 10px;
+            z-index: 5;
+        }
+
+        .hour-hand { width: 6px; height: 35px; margin-left: -3px; }
+        .min-hand { width: 4px; height: 55px; margin-left: -2px; }
+        .sec-hand { width: 2px; height: 60px; background-color: #d32f2f; margin-left: -1px; z-index: 6; }
+        .clock-center {
+            position: absolute; top: 50%; left: 50%;
+            width: 10px; height: 10px; background: #000;
+            border-radius: 50%; transform: translate(-50%, -50%); z-index: 10;
+        }
+
+        .status-panel { margin-bottom: 30px; text-align: center; font-size: 0.9rem; font-weight: bold; }
+
+        /* CONTAINER DA FERROVIA */
+        .railway-container {
+            position: relative;
+            width: 95%;
+            max-width: 1200px;
+            height: 220px;
+            margin-bottom: 60px;
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: visible;
+        }
+
+        .line-title {
+            position: absolute; top: 10px; left: 20px;
+            font-weight: bold; font-size: 1.1rem; background: #fff; padding: 0 5px; z-index: 2;
+        }
+
+        .track-line {
+            position: absolute; top: 60%; left: 45px; right: 45px;
+            height: 4px; background-color: var(--rail-color); border-radius: 2px;
+        }
+
+        .station {
+            position: absolute; top: 60%; transform: translate(-50%, -50%);
+            width: 12px; height: 12px; background-color: var(--bg-color);
+            border: 3px solid var(--station-color); border-radius: 50%; z-index: 1;
+        }
+
+        .station-label {
+            position: absolute; bottom: 18px; left: 50%;
+            transform: rotate(-45deg); transform-origin: 0% 100%;
+            white-space: nowrap; font-size: 0.75rem; font-weight: bold; margin-left: -2px;
+        }
+
+        .station-km {
+            position: absolute; top: 15px; left: 50%;
+            transform: translateX(-50%); font-size: 0.7rem; color: #666;
+        }
+
+        .train {
+            position: absolute; top: 60%; width: 40px; height: 24px;
+            background: var(--train-asc); color: white; font-size: 0.7rem;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; transform: translate(-50%, -50%);
+            z-index: 10; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            transition: left 1s linear; cursor: help;
+        }
+
+        .train.desc { background: var(--train-desc); }
+
+        .legend { display: flex; gap: 20px; font-size: 0.8rem; margin-bottom: 20px; }
+        .dot { width: 10px; height: 10px; display: inline-block; margin-right: 5px; }
+
+        /* SEÇÃO SOBRE */
+        .about-section {
+            margin-top: 20px; padding: 25px; max-width: 800px;
+            background-color: #eeebe3; border: 2px solid #5d5d5d;
+            border-radius: 4px; box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .train-legend-box {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+            margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #999;
+        }
+        .train-group { border-left: 4px solid #555; padding-left: 15px; }
+        .type-p { border-color: var(--train-asc); }
+    </style>
 </head>
 
 <body>
 
     <h1>Estrada de Ferro Santa Catharina</h1>
-    <h2>Movimentação de Trens (1936)</h2>
+    <h2>Monitoramento Histórico</h2>
 
-    <div class="clock-display" id="clock">--:--:--</div>
-    <div class="status-panel" id="status-msg">Carregando dados...</div>
+    <div class="analog-clock">
+        <div class="clock-face">
+            <div class="number n1"><span>1</span></div><div class="number n2"><span>2</span></div>
+            <div class="number n3"><span>3</span></div><div class="number n4"><span>4</span></div>
+            <div class="number n5"><span>5</span></div><div class="number n6"><span>6</span></div>
+            <div class="number n7"><span>7</span></div><div class="number n8"><span>8</span></div>
+            <div class="number n9"><span>9</span></div><div class="number n10"><span>10</span></div>
+            <div class="number n11"><span>11</span></div><div class="number n12"><span>12</span></div>
+            <div class="hand hour-hand" id="hour-hand"></div>
+            <div class="hand min-hand" id="min-hand"></div>
+            <div class="hand sec-hand" id="sec-hand"></div>
+            <div class="clock-center"></div>
+        </div>
+    </div>
+
+    <div class="status-panel" id="status-msg">Iniciando sistemas...</div>
 
     <div class="legend">
-        <div><span class="dot" style="background: var(--train-asc)"></span>Ascendente (Blumenau -> Interior)</div>
-        <div><span class="dot" style="background: var(--train-desc)"></span>Descendente (Interior -> Blumenau)</div>
+        <div><span class="dot" style="background: var(--train-asc)"></span>Ascendente (Interior)</div>
+        <div><span class="dot" style="background: var(--train-desc)"></span>Descendente (Blumenau)</div>
     </div>
 
     <div class="railway-container" id="main-line-container">
@@ -31,263 +203,113 @@
         <div class="track-line"></div>
     </div>
 
+    <section class="about-section">
+        <h2>Sobre o Projeto</h2>
+        <p>Simulador baseado nos horários oficiais de <strong>26 de setembro de 1936</strong>.</p>
+        
+        <div class="train-legend-box">
+            <div class="train-group type-p">
+                <h3>🚆 Trens P</h3>
+                <div style="font-size:0.8rem">P1/P2: Diário<br>P3/P4: Domingos</div>
+            </div>
+            <div class="train-group">
+                <h3>🚂 Trens M</h3>
+                <div style="font-size:0.8rem">M1/M2: Exceto Dom.<br>MR: Misto Ramal</div>
+            </div>
+        </div>
+
+        <p><strong>Elaborado por:</strong> Daniel Baumann</p>
+        <a href="http://memoria.bn.gov.br/docreader/882860/2706" target="_blank">Fonte: Hemeroteca Digital Brasileira</a>
+    </section>
+
     <script>
-        // --- DADOS DA TABELA (Baseado na imagem) ---
-
-        // Distância total da linha principal: 104.3 km
         const MAIN_LINE_LENGTH = 104.3;
-
-        // Estações da Linha Principal (Nome e Km)
         const mainStations = [
-            { name: "Blumenau", km: 0.0 },
-            { name: "Itoupava Secca", km: 2.9 },
-            { name: "Salto Weissbach", km: 8.7 },
-            { name: "Encano", km: 16.9 },
-            { name: "Indayal", km: 22.0 },
-            { name: "Warnow", km: 30.7 },
-            { name: "Eng. Pedro Gomes", km: 41.5 },
-            { name: "Aquidaban", km: 50.1 },
-            { name: "Subida", km: 63.1 },
-            { name: "Riachuelo", km: 83.4 },
-            { name: "Lontras", km: 85.3 },
-            { name: "Matador", km: 91.0 },
-            { name: "Rio do Sul", km: 97.8 },
-            { name: "B. do Trombudo", km: 104.3 }
+            { name: "Blumenau", km: 0.0 }, { name: "Itoupava Secca", km: 2.9 },
+            { name: "Salto Weissbach", km: 8.7 }, { name: "Encano", km: 16.9 },
+            { name: "Indayal", km: 22.0 }, { name: "Warnow", km: 30.7 },
+            { name: "Eng. Pedro Gomes", km: 41.5 }, { name: "Aquidaban", km: 50.1 },
+            { name: "Subida", km: 63.1 }, { name: "Riachuelo", km: 83.4 },
+            { name: "Lontras", km: 85.3 }, { name: "Matador", km: 91.0 },
+            { name: "Rio do Sul", km: 97.8 }, { name: "Barra do Trombudo", km: 104.3 }
         ];
 
-        // Ramal: Subida é o Km 0 do ramal para visualização. 
-        // Estimando Hammonia a ~12km baseado no tempo de viagem (22min) comparado à linha principal.
         const BRANCH_LINE_LENGTH = 12.0;
-        const branchStations = [
-            { name: "Subida", km: 0.0 },
-            { name: "Hammonia", km: 12.0 }
-        ];
+        const branchStations = [{ name: "Subida", km: 0.0 }, { name: "Hammonia", km: 12.0 }];
 
-        // Dias da semana: 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-        // Tipos de dia na tabela: 
-        // "Diario" = [0,1,2,3,4,5,6]
-        // "Domingos" = [0]
-        // "Diario exceto domingos" = [1,2,3,4,5,6]
+        const DAYS_DAILY = [0, 1, 2, 3, 4, 5, 6], DAYS_SUN = [0], DAYS_WEEKDAY = [1, 2, 3, 4, 5, 6];
 
-        const DAYS_DAILY = [0, 1, 2, 3, 4, 5, 6];
-        const DAYS_SUN = [0];
-        const DAYS_WEEKDAY = [1, 2, 3, 4, 5, 6];
-
-        // Trens (Horários convertidos para minutos desde meia-noite para facilitar cálculo)
-        // Direção 1 = Esquerda->Direita (Ascendente), -1 = Direita->Esquerda (Descendente)
         const trains = [
-            // --- LINHA PRINCIPAL ASCENDENTE (Blumenau -> Barra) ---
             { id: "P1", days: DAYS_DAILY, start: "15:00", end: "19:05", dir: 1, line: "main", type: "Passageiro" },
             { id: "P3", days: DAYS_SUN, start: "06:50", end: "10:54", dir: 1, line: "main", type: "Passageiro" },
             { id: "M1", days: DAYS_WEEKDAY, start: "06:20", end: "11:32", dir: 1, line: "main", type: "Misto" },
-
-            // --- LINHA PRINCIPAL DESCENDENTE (Barra -> Blumenau) ---
             { id: "P2", days: DAYS_DAILY, start: "05:02", end: "09:05", dir: -1, line: "main", type: "Passageiro" },
             { id: "P4", days: DAYS_SUN, start: "14:32", end: "18:35", dir: -1, line: "main", type: "Passageiro" },
             { id: "M2", days: DAYS_WEEKDAY, start: "06:06", end: "11:09", dir: -1, line: "main", type: "Misto" },
-
-            // --- RAMAL ASCENDENTE (Subida -> Hammonia) ---
             { id: "PR1", days: DAYS_DAILY, start: "17:22", end: "17:44", dir: 1, line: "branch", type: "Ramal" },
-            { id: "PR3", days: DAYS_SUN, start: "09:11", end: "09:33", dir: 1, line: "branch", type: "Ramal" },
             { id: "MR1", days: DAYS_WEEKDAY, start: "09:31", end: "09:57", dir: 1, line: "branch", type: "Misto" },
-
-            // --- RAMAL DESCENDENTE (Hammonia -> Subida) ---
-            { id: "PR2", days: DAYS_DAILY, start: "06:20", end: "06:43", dir: -1, line: "branch", type: "Ramal" },
-            { id: "PR4", days: DAYS_SUN, start: "15:50", end: "16:13", dir: -1, line: "branch", type: "Ramal" },
-            { id: "MR2", days: DAYS_WEEKDAY, start: "07:40", end: "08:06", dir: -1, line: "branch", type: "Misto" }
+            { id: "PR2", days: DAYS_DAILY, start: "06:20", end: "06:43", dir: -1, line: "branch", type: "Ramal" }
         ];
-
-        // --- FUNÇÕES AUXILIARES ---
 
         function timeToMinutes(timeStr) {
             const [h, m] = timeStr.split(':').map(Number);
             return h * 60 + m;
         }
 
-        function formatTime(date) {
-            return date.toLocaleTimeString('pt-BR', { hour12: false });
-        }
-
-        function getDayType(date) {
-            const day = date.getDay(); // 0 = Dom, 6 = Sab
-            return day;
-        }
-
         function createStationMarkers(containerId, stations, totalLength) {
             const container = document.getElementById(containerId);
             stations.forEach(st => {
-                const pct = (st.km / totalLength) * 90; // Usando 90% da largura (5% padding cada lado)
-
+                const pct = st.km / totalLength;
                 const dot = document.createElement('div');
                 dot.className = 'station';
-                dot.style.left = `calc(5% + ${pct}%)`; // Offset inicial de 5%
-
-                const label = document.createElement('div');
-                label.className = 'station-label';
-                label.innerText = st.name;
-                dot.appendChild(label);
-
-                const km = document.createElement('div');
-                km.className = 'station-km';
-                km.innerText = st.km.toFixed(1);
-                dot.appendChild(km);
-
+                dot.style.left = `calc(45px + (${pct} * (100% - 90px)))`;
+                dot.innerHTML = `<div class="station-label">${st.name}</div><div class="station-km">${st.km.toFixed(1)}</div>`;
                 container.appendChild(dot);
             });
         }
 
-        function getStationAtKm(km, stations) {
-            // Encontra a estação mais próxima (simples aproximação)
-            let closest = stations[0];
-            let minDiff = Math.abs(km - stations[0].km);
-
-            for (let i = 1; i < stations.length; i++) {
-                let diff = Math.abs(km - stations[i].km);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closest = stations[i];
-                }
-            }
-
-            // Se estiver muito longe da estação (ex: > 2km), considera "Em trânsito"
-            if (minDiff > 2.0) return null;
-            return closest.name;
-        }
-
-        function getPreviousStation(km, stations, dir) {
-            // Retorna a última estação pela qual passou
-            let passed = stations.filter(s => dir === 1 ? s.km <= km : s.km >= km);
-            if (passed.length === 0) return stations[dir === 1 ? 0 : stations.length - 1].name;
-
-            // Ordena para pegar a mais próxima do KM atual
-            passed.sort((a, b) => Math.abs(km - a.km) - Math.abs(km - b.km));
-            return passed[0].name;
-        }
-
-        // --- LÓGICA PRINCIPAL ---
-
         function updateSimulation() {
             const now = new Date();
-            document.getElementById('clock').innerText = formatTime(now);
+            const sec = now.getSeconds(), min = now.getMinutes(), hr = now.getHours();
 
-            const currentMinutes = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
-            const currentDay = getDayType(now);
+            // Atualiza Relógio Analógico
+            document.getElementById('sec-hand').style.transform = `rotate(${(sec / 60) * 360}deg)`;
+            document.getElementById('min-hand').style.transform = `rotate(${(min / 60) * 360}deg)`;
+            document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 / 12) * 360 + (min / 60) * 30}deg)`;
 
-            let activeTrainsCount = 0;
-            let msg = `Dia da semana (0=Dom): ${currentDay}. Nenhum trem circulando no momento.`;
+            const curMin = hr * 60 + min + (sec / 60);
+            const curDay = now.getDay();
+            let activeCount = 0;
 
-            // Limpar trens antigos
             document.querySelectorAll('.train').forEach(e => e.remove());
 
-            trains.forEach(train => {
-                // 1. Checa se o trem roda hoje
-                if (!train.days.includes(currentDay)) return;
+            trains.forEach(t => {
+                if (!t.days.includes(curDay)) return;
+                const sMin = timeToMinutes(t.start), eMin = timeToMinutes(t.end);
 
-                const startMin = timeToMinutes(train.start);
-                const endMin = timeToMinutes(train.end);
-
-                // 2. Checa se está no horário
-                if (currentMinutes >= startMin && currentMinutes <= endMin) {
-                    activeTrainsCount++;
-
-                    // Calcular progresso (0.0 a 1.0)
-                    const totalDuration = endMin - startMin;
-                    const elapsed = currentMinutes - startMin;
-                    let progress = elapsed / totalDuration; // % da viagem no tempo
-
-                    // Mapear para KM
-                    const lineLength = train.line === 'main' ? MAIN_LINE_LENGTH : BRANCH_LINE_LENGTH;
-                    let currentKm = 0;
-
-                    if (train.dir === 1) {
-                        // Ascendente (0 -> Fim)
-                        currentKm = progress * lineLength;
-                    } else {
-                        // Descendente (Fim -> 0)
-                        currentKm = lineLength - (progress * lineLength);
-                    }
-
-                    // Determinar onde está visualmente (CSS Left %)
-                    // A linha visual começa em 5% e termina em 95% (total 90% width útil)
-                    const visualPct = (currentKm / lineLength) * 90;
-
-                    // Criar elemento do trem
+                if (curMin >= sMin && curMin <= eMin) {
+                    activeCount++;
+                    const lineLen = t.line === 'main' ? MAIN_LINE_LENGTH : BRANCH_LINE_LENGTH;
+                    const progress = (curMin - sMin) / (eMin - sMin);
+                    const curKm = t.dir === 1 ? progress * lineLen : lineLen - (progress * lineLen);
+                    
                     const trainEl = document.createElement('div');
-                    trainEl.className = `train ${train.dir === -1 ? 'desc' : ''}`;
-                    trainEl.innerText = train.id;
-                    trainEl.style.left = `calc(5% + ${visualPct}%)`;
-
-                    // Informação de Localização
-                    const stationsList = train.line === 'main' ? mainStations : branchStations;
-                    const nearStation = getStationAtKm(currentKm, stationsList);
-                    const prevStation = getPreviousStation(currentKm, stationsList, train.dir);
-
-                    let locText = "";
-                    if (nearStation) {
-                        locText = `Parado/Passando em ${nearStation}`;
-                    } else {
-                        locText = `Passou por ${prevStation}`;
-                    }
-
-                    trainEl.setAttribute('data-info', `${train.type} ${train.id}: ${locText} (Km ${currentKm.toFixed(1)})`);
-
-                    // Adicionar ao container correto
-                    const containerId = train.line === 'main' ? 'main-line-container' : 'branch-line-container';
-                    document.getElementById(containerId).appendChild(trainEl);
+                    trainEl.className = `train ${t.dir === -1 ? 'desc' : ''}`;
+                    trainEl.innerText = t.id;
+                    const posPct = curKm / lineLen;
+                    trainEl.style.left = `calc(45px + (${posPct} * (100% - 90px)))`;
+                    trainEl.setAttribute('data-info', `${t.type} ${t.id} - Km ${curKm.toFixed(1)}`);
+                    
+                    document.getElementById(t.line === 'main' ? 'main-line-container' : 'branch-line-container').appendChild(trainEl);
                 }
             });
-
-            if (activeTrainsCount > 0) {
-                msg = `${activeTrainsCount} trem(s) em circulação agora.`;
-            }
-
-            document.getElementById('status-msg').innerText = msg;
+            document.getElementById('status-msg').innerText = activeCount > 0 ? `${activeCount} trem(s) em tráfego.` : "Nenhum trem em tráfego no momento.";
         }
-
-        // --- INICIALIZAÇÃO ---
 
         createStationMarkers('main-line-container', mainStations, MAIN_LINE_LENGTH);
         createStationMarkers('branch-line-container', branchStations, BRANCH_LINE_LENGTH);
-
-        // Atualiza a cada segundo
         setInterval(updateSimulation, 1000);
-        updateSimulation(); // Rodar imediatamente
-
+        updateSimulation();
     </script>
-    <div class="train-legend-box">
-        <div class="train-group type-p">
-            <h3> Trens P (Passageiros)</h3>
-            <div class="train-item"><span><strong>P1 e P2</strong></span> <span>Diário</span></div>
-            <div class="train-item"><span><strong>P3 e P4</strong></span> <span>Domingos</span></div>
-            <p class="train-desc"> Focados em transporte de passageiros, bagagens e pequenas encomendas.</p>
-        </div>
-
-        <div class="train-group type-m">
-            <h3> Trens M (Mistos)</h3>
-            <div class="train-item"><span><strong>M1 e M2</strong></span> <span>Exceto domingos</span></div>
-            <div class="train-item"><span><strong>MR1 e MR2</strong></span> <span>Misto Ramal</span></div>
-            <p class="train-desc"> Transportam vagões de carga acoplados a carros de passageiros.</p>
-        </div>
-    </div>
-    <section class="about-section">
-        <h2>Sobre o Projeto</h2>
-        <p>
-            Este simulador reproduz o movimento histórico da <strong>Estrada de Ferro Santa Catharina (EFSC)</strong>.
-            A lógica de posicionamento é processada em tempo real, baseada nos horários oficiais da publicação de
-            <strong>21 de setembro de 1936</strong>.
-        </p>
-        <p>
-            <strong>Elaborado por:</strong> Daniel Baumann
-        </p>
-        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
-        <p style="font-size: 0.85rem; font-style: italic;">
-            Fonte documental:
-            <a href="http://memoria.bn.gov.br/docreader/882860/2706" target="_blank">
-                "Horário dos Trens - EFSC - 1936"
-            </a>
-            disponível na Hemeroteca Digital Brasileira.
-        </p>
-    </section>
 </body>
-
 </html>
