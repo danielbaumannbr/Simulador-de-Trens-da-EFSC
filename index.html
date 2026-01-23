@@ -26,7 +26,8 @@
             align-items: center;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -47,7 +48,11 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .clock-face { width: 100%; height: 100%; position: relative; }
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
 
         .number {
             position: absolute;
@@ -62,17 +67,104 @@
             box-sizing: border-box;
         }
 
-        .n1 { transform: rotate(30deg); } .n1 span { display: block; transform: rotate(-30deg); }
-        .n2 { transform: rotate(60deg); } .n2 span { display: block; transform: rotate(-60deg); }
-        .n3 { transform: rotate(90deg); } .n3 span { display: block; transform: rotate(-90deg); }
-        .n4 { transform: rotate(120deg); } .n4 span { display: block; transform: rotate(-120deg); }
-        .n5 { transform: rotate(150deg); } .n5 span { display: block; transform: rotate(-150deg); }
-        .n6 { transform: rotate(180deg); } .n6 span { display: block; transform: rotate(-180deg); }
-        .n7 { transform: rotate(210deg); } .n7 span { display: block; transform: rotate(-210deg); }
-        .n8 { transform: rotate(240deg); } .n8 span { display: block; transform: rotate(-240deg); }
-        .n9 { transform: rotate(270deg); } .n9 span { display: block; transform: rotate(-270deg); }
-        .n10 { transform: rotate(300deg); } .n10 span { display: block; transform: rotate(-300deg); }
-        .n11 { transform: rotate(330deg); } .n11 span { display: block; transform: rotate(-330deg); }
+        .n1 {
+            transform: rotate(30deg);
+        }
+
+        .n1 span {
+            display: block;
+            transform: rotate(-30deg);
+        }
+
+        .n2 {
+            transform: rotate(60deg);
+        }
+
+        .n2 span {
+            display: block;
+            transform: rotate(-60deg);
+        }
+
+        .n3 {
+            transform: rotate(90deg);
+        }
+
+        .n3 span {
+            display: block;
+            transform: rotate(-90deg);
+        }
+
+        .n4 {
+            transform: rotate(120deg);
+        }
+
+        .n4 span {
+            display: block;
+            transform: rotate(-120deg);
+        }
+
+        .n5 {
+            transform: rotate(150deg);
+        }
+
+        .n5 span {
+            display: block;
+            transform: rotate(-150deg);
+        }
+
+        .n6 {
+            transform: rotate(180deg);
+        }
+
+        .n6 span {
+            display: block;
+            transform: rotate(-180deg);
+        }
+
+        .n7 {
+            transform: rotate(210deg);
+        }
+
+        .n7 span {
+            display: block;
+            transform: rotate(-210deg);
+        }
+
+        .n8 {
+            transform: rotate(240deg);
+        }
+
+        .n8 span {
+            display: block;
+            transform: rotate(-240deg);
+        }
+
+        .n9 {
+            transform: rotate(270deg);
+        }
+
+        .n9 span {
+            display: block;
+            transform: rotate(-270deg);
+        }
+
+        .n10 {
+            transform: rotate(300deg);
+        }
+
+        .n10 span {
+            display: block;
+            transform: rotate(-300deg);
+        }
+
+        .n11 {
+            transform: rotate(330deg);
+        }
+
+        .n11 span {
+            display: block;
+            transform: rotate(-330deg);
+        }
 
         .hand {
             position: absolute;
@@ -84,9 +176,25 @@
             z-index: 5;
         }
 
-        .hour-hand { width: 6px; height: 35px; margin-left: -3px; }
-        .min-hand { width: 4px; height: 55px; margin-left: -2px; }
-        .sec-hand { width: 2px; height: 60px; background-color: #d32f2f; margin-left: -1px; z-index: 6; }
+        .hour-hand {
+            width: 6px;
+            height: 35px;
+            margin-left: -3px;
+        }
+
+        .min-hand {
+            width: 4px;
+            height: 55px;
+            margin-left: -2px;
+        }
+
+        .sec-hand {
+            width: 2px;
+            height: 60px;
+            background-color: #d32f2f;
+            margin-left: -1px;
+            z-index: 6;
+        }
 
         .clock-center {
             position: absolute;
@@ -112,7 +220,7 @@
             position: relative;
             width: 95%;
             max-width: 1200px;
-            height: 420px; 
+            height: 420px;
             margin-bottom: 60px;
             border: 1px solid #ccc;
             background: #fff;
@@ -133,7 +241,7 @@
 
         .track-line {
             position: absolute;
-            top: 150px; 
+            top: 150px;
             left: 80px;
             right: 80px;
             height: 4px;
@@ -145,7 +253,7 @@
             position: absolute;
             top: 150px;
             width: 4px;
-            height: 120px; 
+            height: 120px;
             background-color: var(--rail-color);
             z-index: 1;
         }
@@ -199,15 +307,28 @@
             transition: left 1s linear, top 1s linear;
         }
 
-        .train.desc { background: var(--train-desc); }
-        
+        .train.desc {
+            background: var(--train-desc);
+        }
+
         /* Rotaciona os trens do ramal para ficarem verticais */
         .train.branch-train {
             transform: translate(-50%, -50%) rotate(90deg);
         }
 
-        .legend { display: flex; gap: 20px; font-size: 0.8rem; margin-bottom: 20px; }
-        .dot { width: 10px; height: 10px; display: inline-block; margin-right: 5px; }
+        .legend {
+            display: flex;
+            gap: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            display: inline-block;
+            margin-right: 5px;
+        }
 
         /* SEÇÃO SOBRE */
         .about-section {
@@ -230,8 +351,14 @@
             border: 1px solid #999;
         }
 
-        .train-group { border-left: 4px solid #555; padding-left: 15px; }
-        .type-p { border-color: var(--train-asc); }
+        .train-group {
+            border-left: 4px solid #555;
+            padding-left: 15px;
+        }
+
+        .type-p {
+            border-color: var(--train-asc);
+        }
     </style>
 </head>
 
@@ -279,7 +406,7 @@
             <p>
                 Este simulador é fundamentado nos horários oficiais publicados pelo jornal <strong>A Cidade</strong> em
                 26 de setembro de 1936, refletindo a malha ferroviária da <strong>Estrada de Ferro Santa Catharina
-                (EFSC)</strong> que entrou em vigor em outubro de 1936.
+                    (EFSC)</strong> que entrou em vigor em outubro de 1936.
             </p>
             <div style="background-color: #f9f9f9; border-left: 4px solid #2c3e50; padding: 15px; margin: 20px 0;">
                 <strong>Guia de Tráfego:</strong>
@@ -291,7 +418,8 @@
                     o Ramal de Hammonia.
                 </p>
             </div>
-            <p style="font-style: italic; font-size: 0.95em; color: #444; background-color: #fff9e6; padding: 10px; border-radius: 4px;">
+            <p
+                style="font-style: italic; font-size: 0.95em; color: #444; background-color: #fff9e6; padding: 10px; border-radius: 4px;">
                 <strong>Nota de Embarque:</strong> Se você abrir o mapa e não encontrar nenhum trem se movimentando, não
                 se preocupe: você está presenciando o silêncio real das trilhas naquela hora específica. Volte em outros
                 horários ou consulte o jornal na Hemeroteca para saber a que horas você deve "embarcar" (risos).
@@ -299,7 +427,8 @@
             <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
             <p style="font-size: 0.85em; color: #666; line-height: 1.4;">
                 <em>Atenção: O programa pode apresentar oscilações técnicas ou erros pontuais de funcionamento. O
-                projeto é uma ferramenta de resgate histórico e não possui pretensão de exatidão técnica absoluta.</em><br><br>
+                    projeto é uma ferramenta de resgate histórico e não possui pretensão de exatidão técnica
+                    absoluta.</em><br><br>
                 <strong>Autor:</strong> Daniel Baumann | <strong>Fonte:</strong> Hemeroteca Digital Brasileira.
             </p>
         </section>
@@ -316,7 +445,8 @@
         </div>
 
         <p><strong>Elaborado por:</strong> Daniel Baumann</p>
-        <a href="http://memoria.bn.gov.br/DocReader/882860/2706" target="_blank">Fonte: Horário dos Trens - EFSC - 1936</a>
+        <a href="http://memoria.bn.gov.br/DocReader/882860/2706" target="_blank">Fonte: Horário dos Trens - EFSC -
+            1936</a>
     </section>
 
     <script>
@@ -335,15 +465,18 @@
         ];
 
         const trains = [
-            { id: "P1", days: [0,1,2,3,4,5,6], start: "15:00", end: "19:05", dir: 1, line: "main" },
+            { id: "P1", days: [0, 1, 2, 3, 4, 5, 6], start: "15:00", end: "19:05", dir: 1, line: "main" },
             { id: "P3", days: [0], start: "06:50", end: "10:54", dir: 1, line: "main" },
-            { id: "M1", days: [1,2,3,4,5,6], start: "06:20", end: "11:32", dir: 1, line: "main" },
-            { id: "P2", days: [0,1,2,3,4,5,6], start: "05:02", end: "09:05", dir: -1, line: "main" },
+            { id: "M1", days: [1, 2, 3, 4, 5, 6], start: "06:20", end: "11:32", dir: 1, line: "main" },
+            { id: "P2", days: [0, 1, 2, 3, 4, 5, 6], start: "05:02", end: "09:05", dir: -1, line: "main" },
             { id: "P4", days: [0], start: "14:32", end: "18:35", dir: -1, line: "main" },
-            { id: "M2", days: [1,2,3,4,5,6], start: "06:06", end: "11:09", dir: -1, line: "main" },
-            { id: "PR1", days: [0,1,2,3,4,5,6], start: "17:22", end: "17:44", dir: 1, line: "branch" },
-            { id: "MR1", days: [1,2,3,4,5,6], start: "09:31", end: "09:57", dir: 1, line: "branch" },
-            { id: "PR2", days: [0,1,2,3,4,5,6], start: "06:20", end: "06:43", dir: -1, line: "branch" }
+            { id: "M2", days: [1, 2, 3, 4, 5, 6], start: "06:06", end: "11:09", dir: -1, line: "main" },
+            { id: "PR1", days: [0, 1, 2, 3, 4, 5, 6], start: "17:22", end: "17:44", dir: 1, line: "branch" },
+            { id: "PR3", days: [0], start: "09:11", end: "09:33", dir: 1, line: "branch" },
+            { id: "MR1", days: [1, 2, 3, 4, 5, 6], start: "09:31", end: "09:57", dir: 1, line: "branch" },
+            { id: "MR2", days: [1, 2, 3, 4, 5, 6], start: "07:40", end: "08:06", dir: -1, line: "branch" },
+            { id: "PR4", days: [0], start: "15:50", end: "16:13", dir: -1, line: "branch" },
+            { id: "PR2", days: [0, 1, 2, 3, 4, 5, 6], start: "06:20", end: "06:43", dir: -1, line: "branch" }
         ];
 
         function initMap() {
@@ -379,8 +512,8 @@
             const curDay = now.getDay();
 
             document.getElementById('sec-hand').style.transform = `rotate(${sec * 6}deg)`;
-            document.getElementById('min-hand').style.transform = `rotate(${(min + sec/60) * 6}deg)`;
-            document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 + min/60) * 30}deg)`;
+            document.getElementById('min-hand').style.transform = `rotate(${(min + sec / 60) * 6}deg)`;
+            document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 + min / 60) * 30}deg)`;
 
             document.querySelectorAll('.train').forEach(e => e.remove());
             let active = 0;
@@ -393,7 +526,7 @@
                     active++;
                     const progress = (curMin - sMin) / (eMin - sMin);
                     const trainEl = document.createElement('div');
-                    
+
                     // Adiciona classe branch-train se o trem for do ramal
                     const branchClass = t.line === 'branch' ? 'branch-train' : '';
                     trainEl.className = `train ${t.dir === -1 ? 'desc' : ''} ${branchClass}`;
@@ -425,4 +558,5 @@
         updateSimulation();
     </script>
 </body>
+
 </html>
