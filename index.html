@@ -107,7 +107,7 @@
             font-weight: bold;
         }
 
-        /* CONTAINER DA FERROVIA UNIFICADA */
+        /* CONTAINER DA FERROVIA */
         .railway-container {
             position: relative;
             width: 95%;
@@ -145,7 +145,7 @@
             position: absolute;
             top: 150px;
             width: 4px;
-            height: 120px; /* Aumentado para representar os 12km em escala */
+            height: 120px; 
             background-color: var(--rail-color);
             z-index: 1;
         }
@@ -200,6 +200,11 @@
         }
 
         .train.desc { background: var(--train-desc); }
+        
+        /* Rotaciona os trens do ramal para ficarem verticais */
+        .train.branch-train {
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
 
         .legend { display: flex; gap: 20px; font-size: 0.8rem; margin-bottom: 20px; }
         .dot { width: 10px; height: 10px; display: inline-block; margin-right: 5px; }
@@ -317,7 +322,7 @@
     <script>
         const MAIN_LENGTH = 104.3;
         const SUBIDA_KM = 63.1;
-        const BRANCH_LENGTH = 12.0; // Distância Subida - Hammonia
+        const BRANCH_LENGTH = 12.0;
 
         const mainStations = [
             { name: "Blumenau", km: 0.0 }, { name: "Itoupava Secca", km: 2.9 },
@@ -345,7 +350,6 @@
             const container = document.getElementById('map-container');
             const subidaX = `calc(80px + (${SUBIDA_KM / MAIN_LENGTH} * (100% - 160px)))`;
 
-            // Estações Linha Principal
             mainStations.forEach(st => {
                 const el = document.createElement('div');
                 el.className = 'station';
@@ -355,18 +359,16 @@
                 container.appendChild(el);
             });
 
-            // Desenhar Ramal
             const branchRail = document.createElement('div');
             branchRail.className = 'track-branch';
             branchRail.style.left = subidaX;
             container.appendChild(branchRail);
 
-            // Estação Hammonia
             const hammonia = document.createElement('div');
             hammonia.className = 'station';
             hammonia.style.left = subidaX;
-            hammonia.style.top = '270px'; // Topo da linha principal (150) + Altura do Ramal (120)
-            hammonia.innerHTML = `<div class="station-label" style="transform:rotate(0); left:15px; bottom:-5px">Hammonia</div><div class="station-km">${BRANCH_LENGTH.toFixed(1)} km</div>`;
+            hammonia.style.top = '270px';
+            hammonia.innerHTML = `<div class="station-label" style="transform:rotate(0); left:15px; bottom:-5px">Hammonia</div><div class="station-km">12.0 km</div>`;
             container.appendChild(hammonia);
         }
 
@@ -376,7 +378,6 @@
             const curMin = hr * 60 + min + (sec / 60);
             const curDay = now.getDay();
 
-            // Relógio
             document.getElementById('sec-hand').style.transform = `rotate(${sec * 6}deg)`;
             document.getElementById('min-hand').style.transform = `rotate(${(min + sec/60) * 6}deg)`;
             document.getElementById('hour-hand').style.transform = `rotate(${(hr % 12 + min/60) * 30}deg)`;
@@ -392,7 +393,10 @@
                     active++;
                     const progress = (curMin - sMin) / (eMin - sMin);
                     const trainEl = document.createElement('div');
-                    trainEl.className = `train ${t.dir === -1 ? 'desc' : ''}`;
+                    
+                    // Adiciona classe branch-train se o trem for do ramal
+                    const branchClass = t.line === 'branch' ? 'branch-train' : '';
+                    trainEl.className = `train ${t.dir === -1 ? 'desc' : ''} ${branchClass}`;
                     trainEl.innerText = t.id;
 
                     if (t.line === 'main') {
@@ -400,7 +404,6 @@
                         trainEl.style.left = `calc(80px + (${km / MAIN_LENGTH} * (100% - 160px)))`;
                         trainEl.style.top = '150px';
                     } else {
-                        // Movimento no ramal: entre top 150 (Subida) e top 270 (Hammonia)
                         const subidaXPos = `calc(80px + (${SUBIDA_KM / MAIN_LENGTH} * (100% - 160px)))`;
                         const yProgress = t.dir === 1 ? progress : 1 - progress;
                         trainEl.style.left = subidaXPos;
@@ -422,5 +425,4 @@
         updateSimulation();
     </script>
 </body>
-
 </html>
