@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maria Fumaça - Tempo Real</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -23,30 +23,45 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white font-sans overflow-hidden">
+<body class="bg-gray-900 text-white font-sans overflow-hidden select-none">
 
-    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-gray-800/95 backdrop-blur-md px-6 py-4 rounded-xl shadow-2xl border border-gray-700 flex flex-col sm:flex-row items-center gap-4 w-11/12 max-w-2xl">
-        <div class="flex items-center gap-3">
-            <div class="p-3 bg-amber-600 rounded-lg text-2xl animate-pulse">
-                <i class="fa-solid fa-train text-gray-900"></i>
-            </div>
-            <div>
-                <h1 class="text-lg font-bold tracking-wide text-amber-400">Expresso Tempo Real</h1>
-                <p id="status-txt" class="text-xs text-gray-400">Velocidade simulada: 25 km/h</p>
-            </div>
-        </div>
+    <div class="absolute top-2 sm:top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-gray-800/95 backdrop-blur-md px-4 py-3 sm:px-6 sm:py-4 rounded-xl shadow-2xl border border-gray-700 flex flex-col gap-3 w-[92%] max-w-2xl">
         
-        <div class="flex items-center gap-2 ml-auto w-full sm:w-auto justify-end">
-            <button id="btn-play" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded-lg transition-all flex items-center gap-2">
-                <i class="fa-solid fa-play"></i> Partir
-            </button>
-            <button id="btn-pause" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold py-2 px-4 rounded-lg transition-all hidden flex items-center gap-2">
-                <i class="fa-solid fa-pause"></i> Pausar
-            </button>
-            <button id="btn-reset" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-all border border-gray-600 flex items-center gap-2">
-                <i class="fa-solid fa-rotate-left"></i> Reiniciar
-            </button>
+        <div class="flex items-center justify-between w-full">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 sm:p-3 bg-amber-600 rounded-lg text-xl sm:text-2xl animate-pulse flex-shrink-0">
+                    <i class="fa-solid fa-train text-gray-900"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-wide text-amber-400 leading-tight">Expresso Tempo Real</h1>
+                    <p id="status-txt" class="text-[11px] sm:text-xs text-gray-400">Velocidade simulada: 25 km/h</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <button id="btn-play" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold p-2.5 sm:py-2 sm:px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-play"></i> <span class="hidden sm:inline">Partir</span>
+                </button>
+                <button id="btn-pause" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold p-2.5 sm:py-2 sm:px-4 rounded-lg transition-all hidden flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-pause"></i> <span class="hidden sm:inline">Pausar</span>
+                </button>
+                <button id="btn-reset" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold p-2.5 sm:py-2 sm:px-4 rounded-lg transition-all border border-gray-600 flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-rotate-left"></i> <span class="hidden sm:inline">Reiniciar</span>
+                </button>
+            </div>
         </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-700/60 text-xs sm:hidden">
+            <div class="flex flex-col">
+                <span class="text-gray-400 text-[10px] uppercase tracking-wider">Altitude</span>
+                <span id="tel-ele-mobile" class="font-mono text-amber-400 font-bold">---</span>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="text-gray-400 text-[10px] uppercase tracking-wider">Distância</span>
+                <span id="tel-dist-mobile" class="font-mono text-gray-300 font-bold">---</span>
+            </div>
+        </div>
+
     </div>
 
     <div class="absolute bottom-6 left-6 z-[1000] bg-gray-900/85 backdrop-blur-md p-4 rounded-lg border border-gray-700 shadow-xl pointer-events-none text-sm hidden sm:block">
@@ -60,7 +75,7 @@
     <div id="map" class="w-screen h-screen z-0"></div>
 
     <script>
-    // Dados do GPX (Tratados e limpos de duplicatas consecutivas)
+    // Dados do GPX
     const gpxData = [
         {lat: -27.125254, lon: -49.515807, ele: 321.24}, {lat: -27.125153, lon: -49.515677, ele: 319.61},
         {lat: -27.12495, lon: -49.515497, ele: 314.18}, {lat: -27.124788, lon: -49.515406, ele: 310.36},
@@ -83,15 +98,15 @@
         {lat: -27.113787, lon: -49.51683, ele: 288.7}, {lat: -27.113223, lon: -49.516701, ele: 291.26},
         {lat: -27.112856, lon: -49.516444, ele: 296.77}, {lat: -27.112541, lon: -49.516181, ele: 297.75},
         {lat: -27.111953, lon: -49.515602, ele: 299.06}, {lat: -27.111275, lon: -49.51499, ele: 306.34},
-        {lat: -27.111003, lon: -49.514545, ele: 312.77}, {lat: -27.110826, lon: -49.514293, ele: 312.54},
-        {lat: -27.11064, lon: -49.513966, ele: 309.64}, {lat: -27.110368, lon: -49.513708, ele: 296.59},
+        {lat: -27.110003, lon: -49.514545, ele: 312.77}, {lat: -27.110826, lon: -49.514293, ele: 312.54},
+        {lat: -27.11064,  lon: -49.513966, ele: 309.64}, {lat: -27.110368, lon: -49.513708, ele: 296.59},
         {lat: -27.110134, lon: -49.513563, ele: 293.02}, {lat: -27.109862, lon: -49.513424, ele: 291.01},
         {lat: -27.109451, lon: -49.513257, ele: 289.89}, {lat: -27.109301, lon: -49.513155, ele: 291.57},
         {lat: -27.109112, lon: -49.513027, ele: 293.68}, {lat: -27.108864, lon: -49.512768, ele: 299.37}, 
         {lat: -27.108678, lon: -49.512522, ele: 305.03}, {lat: -27.108534, lon: -49.512163, ele: 306.34}, 
-        {lat: -27.108382, lon: -49.51101, ele: 315.12}, {lat: -27.108253, lon: -49.510709, ele: 311.16}, 
+        {lat: -27.108382, lon: -49.51101,  ele: 315.12}, {lat: -27.108253, lon: -49.510709, ele: 311.16}, 
         {lat: -27.107921, lon: -49.510079, ele: 301.77}, {lat: -27.107857, lon: -49.509799, ele: 305.88}, 
-        {lat: -27.107794, lon: -49.509626, ele: 309.41}, {lat: -27.10767, lon: -49.509376, ele: 311.87}, 
+        {lat: -27.107794, lon: -49.509626, ele: 309.41}, {lat: -27.10767,  lon: -49.509376, ele: 311.87}, 
         {lat: -27.107551, lon: -49.509186, ele: 311.39}, {lat: -27.107434, lon: -49.509028, ele: 308.99}, 
         {lat: -27.107272, lon: -49.508756, ele: 305.12}, {lat: -27.107154, lon: -49.508494, ele: 302.27}, 
         {lat: -27.107068, lon: -49.508231, ele: 300.04}, {lat: -27.107057, lon: -49.507975, ele: 298.01}, 
@@ -99,39 +114,39 @@
         {lat: -27.107143, lon: -49.507578, ele: 302.1},  {lat: -27.107226, lon: -49.507357, ele: 303.79}, 
         {lat: -27.107303, lon: -49.507181, ele: 300.87}, {lat: -27.107424, lon: -49.507016, ele: 300.81}, 
         {lat: -27.107632, lon: -49.506792, ele: 302.69}, {lat: -27.108835, lon: -49.505586, ele: 295.92}, 
-        {lat: -27.109575, lon: -49.504816, ele: 291.95}, {lat: -27.1098, lon: -49.504578, ele: 292.47}, 
-        {lat: -27.110054, lon: -49.504268, ele: 291.66}, {lat: -27.110329, lon: -49.50372, ele: 289.49}, 
+        {lat: -27.109575, lon: -49.504816, ele: 291.95}, {lat: -27.1098,   lon: -49.504578, ele: 292.47}, 
+        {lat: -27.110054, lon: -49.504268, ele: 291.66}, {lat: -27.110329, lon: -49.50372,  ele: 289.49}, 
         {lat: -27.110534, lon: -49.503205, ele: 293.44}, {lat: -27.110544, lon: -49.503165, ele: 293.53}, 
-        {lat: -27.110678, lon: -49.502601, ele: 294.67}, {lat: -27.11072, lon: -49.502325, ele: 294.33}, 
+        {lat: -27.110678, lon: -49.502601, ele: 294.67}, {lat: -27.11072,  lon: -49.502325, ele: 294.33}, 
         {lat: -27.110724, lon: -49.501762, ele: 291.76}, {lat: -27.110708, lon: -49.501513, ele: 290.59}, 
-        {lat: -27.110651, lon: -49.50115, ele: 290.61},  {lat: -27.110545, lon: -49.500782, ele: 287.52}, 
+        {lat: -27.110651, lon: -49.50115,  ele: 290.61}, {lat: -27.110545, lon: -49.500782, ele: 287.52}, 
         {lat: -27.110388, lon: -49.500367, ele: 288.06}, {lat: -27.109657, lon: -49.498864, ele: 280.47}, 
-        {lat: -27.109384, lon: -49.498372, ele: 280.33}, {lat: -27.10921, lon: -49.498176, ele: 277.9}, 
+        {lat: -27.109384, lon: -49.498372, ele: 280.33}, {lat: -27.10921,  lon: -49.498176, ele: 277.9}, 
         {lat: -27.109026, lon: -49.498042, ele: 274.01}, {lat: -27.108657, lon: -49.497882, ele: 267.51}, 
         {lat: -27.108607, lon: -49.497881, ele: 267.26}, {lat: -27.108063, lon: -49.497871, ele: 264.55}, 
         {lat: -27.107193, lon: -49.497928, ele: 258.46}, {lat: -27.106378, lon: -49.498491, ele: 243.5}, 
         {lat: -27.105789, lon: -49.498796, ele: 241.88}, {lat: -27.105234, lon: -49.499084, ele: 240.36}, 
-        {lat: -27.10434, lon: -49.499428, ele: 244.79},  {lat: -27.103673, lon: -49.499662, ele: 246.5}, 
+        {lat: -27.10434,  lon: -49.499428, ele: 244.79}, {lat: -27.103673, lon: -49.499662, ele: 246.5}, 
         {lat: -27.103122, lon: -49.499913, ele: 242.36}, {lat: -27.101794, lon: -49.500543, ele: 243.9}, 
         {lat: -27.090784, lon: -49.509888, ele: 211.09}, {lat: -27.090346, lon: -49.510672, ele: 200.81}, 
-        {lat: -27.08963, lon: -49.511257, ele: 214.33},  {lat: -27.089464, lon: -49.511631, ele: 207.87}, 
+        {lat: -27.08963,  lon: -49.511257, ele: 214.33}, {lat: -27.089464, lon: -49.511631, ele: 207.87}, 
         {lat: -27.088769, lon: -49.512591, ele: 198.27}, {lat: -27.088429, lon: -49.512754, ele: 199.08}, 
-        {lat: -27.088096, lon: -49.51277, ele: 205.01},  {lat: -27.087668, lon: -49.512556, ele: 217.07}, 
+        {lat: -27.088096, lon: -49.51277,  ele: 205.01}, {lat: -27.087668, lon: -49.512556, ele: 217.07}, 
         {lat: -27.087096, lon: -49.512138, ele: 225.73}, {lat: -27.086304, lon: -49.511273, ele: 231.03}, 
         {lat: -27.086033, lon: -49.510625, ele: 238.3},  {lat: -27.085874, lon: -49.509432, ele: 251.69}, 
-        {lat: -27.085717, lon: -49.508369, ele: 253.41}, {lat: -27.08596, lon: -49.507552, ele: 254.74}, 
-        {lat: -27.08536, lon: -49.506156, ele: 248.85},  {lat: -27.085197, lon: -49.50536, ele: 245.32}, 
+        {lat: -27.085717, lon: -49.508369, ele: 253.41}, {lat: -27.08596,  lon: -49.507552, ele: 254.74}, 
+        {lat: -27.08536,  lon: -49.506156, ele: 248.85}, {lat: -27.085197, lon: -49.50536,  ele: 245.32}, 
         {lat: -27.084849, lon: -49.504528, ele: 232.84}, {lat: -27.085168, lon: -49.503397, ele: 246.6}, 
-        {lat: -27.085124, lon: -49.503091, ele: 242.3},  {lat: -27.084957, lon: -49.50249, ele: 234.01}, 
+        {lat: -27.085124, lon: -49.503091, ele: 242.3},  {lat: -27.084957, lon: -49.50249,  ele: 234.01}, 
         {lat: -27.084443, lon: -49.501484, ele: 218.74}, {lat: -27.084318, lon: -49.501078, ele: 215.42}, 
-        {lat: -27.084261, lon: -49.500484, ele: 216.4},  {lat: -27.08436, lon: -49.499994, ele: 222.75}, 
-        {lat: -27.084408, lon: -49.498707, ele: 226.66}, {lat: -27.08429, lon: -49.498333, ele: 222.63}, 
+        {lat: -27.084261, lon: -49.500484, ele: 216.4},  {lat: -27.08436,  lon: -49.499994, ele: 222.75}, 
+        {lat: -27.084408, lon: -49.498707, ele: 226.66}, {lat: -27.08429,  lon: -49.498333, ele: 222.63}, 
         {lat: -27.084054, lon: -49.497966, ele: 218.91}, {lat: -27.083608, lon: -49.497785, ele: 209.46}, 
-        {lat: -27.08375, lon: -49.497771, ele: 208.75},  {lat: -27.083075, lon: -49.497685, ele: 206.77}, 
+        {lat: -27.08375,  lon: -49.497771, ele: 208.75}, {lat: -27.083075, lon: -49.497685, ele: 206.77}, 
         {lat: -27.082714, lon: -49.497272, ele: 219.72}, {lat: -27.081936, lon: -49.496925, ele: 215.17}, 
         {lat: -27.081223, lon: -49.496535, ele: 210.9},  {lat: -27.081056, lon: -49.496357, ele: 213.21}, 
-        {lat: -27.080865, lon: -49.496049, ele: 219.12}, {lat: -27.080722, lon: -49.49562, ele: 225.73}, 
-        {lat: -27.080729, lon: -49.495102, ele: 227.92}, {lat: -27.081, lon: -49.493893, ele: 232.01}, 
+        {lat: -27.080865, lon: -49.496049, ele: 219.12}, {lat: -27.080722, lon: -49.49562,  ele: 225.73}, 
+        {lat: -27.080729, lon: -49.495102, ele: 227.92}, {lat: -27.081,    lon: -49.493893, ele: 232.01}, 
         {lat: -27.080973, lon: -49.493694, ele: 230.54}, {lat: -27.080899, lon: -49.493163, ele: 226.63}, 
         {lat: -27.080889, lon: -49.492383, ele: 224.02}, {lat: -27.080872, lon: -49.491705, ele: 217.69}, 
         {lat: -27.081073, lon: -49.491112, ele: 220.94}, {lat: -27.081747, lon: -49.489045, ele: 224.72}, 
@@ -139,34 +154,37 @@
         {lat: -27.083212, lon: -49.485878, ele: 214.94}, {lat: -27.084226, lon: -49.484581, ele: 211.62}, 
         {lat: -27.085011, lon: -49.484392, ele: 219.22}, {lat: -27.085424, lon: -49.483511, ele: 205.04}, 
         {lat: -27.085774, lon: -49.483121, ele: 193.49}, {lat: -27.086465, lon: -49.482829, ele: 189.99}, 
-        {lat: -27.08744, lon: -49.482763, ele: 190.16},  {lat: -27.087093, lon: -49.482639, ele: 191.43}, 
-        {lat: -27.08738, lon: -49.482445, ele: 197.63},  {lat: -27.08756, lon: -49.482214, ele: 200.97}, 
-        {lat: -27.087703, lon: -49.481895, ele: 200.45}, {lat: -27.0879, lon: -49.481251, ele: 200.11}, 
+        {lat: -27.08744,  lon: -49.482763, ele: 190.16}, {lat: -27.087093, lon: -49.482639, ele: 191.43}, 
+        {lat: -27.08738,  lon: -49.482445, ele: 197.63}, {lat: -27.08756,  lon: -49.482214, ele: 200.97}, 
+        {lat: -27.087703, lon: -49.481895, ele: 200.45}, {lat: -27.0879,   lon: -49.481251, ele: 200.11}, 
         {lat: -27.087917, lon: -49.480824, ele: 199.12}, {lat: -27.088253, lon: -49.479321, ele: 193.07}, 
         {lat: -27.088518, lon: -49.477865, ele: 194.79}, {lat: -27.088564, lon: -49.477693, ele: 194.88}, 
-        {lat: -27.088901, lon: -49.476409, ele: 195.5},  {lat: -27.08954, lon: -49.47535, ele: 192.99}, 
-        {lat: -27.090394, lon: -49.474435, ele: 195.76}, {lat: -27.09199, lon: -49.472797, ele: 182.03}, 
+        {lat: -27.088901, lon: -49.476409, ele: 195.5},  {lat: -27.08954,  lon: -49.47535,  ele: 192.99}, 
+        {lat: -27.090394, lon: -49.474435, ele: 195.76}, {lat: -27.09199,  lon: -49.472797, ele: 182.03}, 
         {lat: -27.092224, lon: -49.472495, ele: 179.52}, {lat: -27.092618, lon: -49.471988, ele: 175.3}, 
         {lat: -27.093134, lon: -49.471512, ele: 176.02}, {lat: -27.093571, lon: -49.471261, ele: 176.01}, 
         {lat: -27.093746, lon: -49.471194, ele: 177.94}, {lat: -27.093974, lon: -49.471048, ele: 179.99}, 
         {lat: -27.094209, lon: -49.470796, ele: 179.6},  {lat: -27.094194, lon: -49.470812, ele: 179.62}
     ];
 
-    // Tratamento de segurança para chaves com nomenclatura antiga
     gpxData.forEach(pt => { if(pt.font) { pt.lon = pt.font; delete pt.font; } });
 
     const pathCoords = gpxData.map(pt => [pt.lat, pt.lon]);
-    const map = L.map('map', { zoomControl: false }).setView(pathCoords[0], 15);
+    
+    // Desativado zoom duplo por toque e ajustado controle para evitar erros no mobile
+    const map = L.map('map', { 
+        zoomControl: false,
+        doubleClickZoom: false,
+        tap: L.Browser.mobile ? false : true 
+    }).setView(pathCoords[0], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    // Trilhos estruturados
     L.polyline(pathCoords, { color: '#4a5568', weight: 6, opacity: 0.8, dashArray: '2, 6' }).addTo(map);
     L.polyline(pathCoords, { color: '#cbd5e1', weight: 2, opacity: 0.4 }).addTo(map);
 
-    // Ícone customizado da Locomotiva
     const trainIcon = L.divIcon({
         html: `
             <div class="relative flex items-center justify-center w-10 h-10 bg-amber-500 rounded-full border-2 border-amber-950 shadow-2xl text-gray-900" id="train-marker" style="transform-origin: center center;">
@@ -178,7 +196,6 @@
 
     const trainMarker = L.marker(pathCoords[0], { icon: trainIcon }).addTo(map);
 
-    // Configurações de Física Analógica Ajustadas para 25 km/h
     const SIMULATED_SPEED_KMH = 25; 
     const SPEED_MPS = SIMULATED_SPEED_KMH / 3.6; 
 
@@ -191,15 +208,15 @@
     let totalDistanceTraveled = 0;
     let lastTimestamp = null;
 
-    // Elementos da Interface Gráfica
     const btnPlay = document.getElementById('btn-play');
     const btnPause = document.getElementById('btn-pause');
     const btnReset = document.getElementById('btn-reset');
     const txtStatus = document.getElementById('status-txt');
-    const telEle = document.getElementById('tel-ele');
-    const telDist = document.getElementById('tel-dist');
+    
+    // Mapeamento duplo para os seletores de Telemetria (Desktop + Mobile)
+    const telEles = [document.getElementById('tel-ele'), document.getElementById('tel-ele-mobile')];
+    const telDists = [document.getElementById('tel-dist'), document.getElementById('tel-dist-mobile')];
 
-    // Equações Geodésicas (Haversine e Bearing)
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
         const R = 6371000;
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -226,7 +243,6 @@
         };
     }
 
-    // Loop de renderização em tempo real (60fps)
     function globalSimulationLoop(timestamp) {
         if (!isPlaying) return;
 
@@ -284,10 +300,11 @@
     }
 
     function updateTelemetria(elevation, distance) {
-        telEle.innerText = `${elevation.toFixed(1)} m`;
-        telDist.innerText = distance < 1000 ? 
-            `${distance.toFixed(0)} metros` : 
-            `${(distance / 1000).toFixed(2)} km`;
+        const textEle = `${elevation.toFixed(1)} m`;
+        const textDist = distance < 1000 ? `${distance.toFixed(0)} m` : `${(distance / 1000).toFixed(2)} km`;
+        
+        telEles.forEach(el => { if(el) el.innerText = textEle; });
+        telDists.forEach(el => { if(el) el.innerText = textDist; });
     }
 
     function emitSmoke() {
@@ -310,8 +327,8 @@
         lastTimestamp = null; 
         btnPlay.classList.add('hidden');
         btnPause.classList.remove('hidden');
-        txtStatus.innerText = "Locomotiva em marcha constante...";
-        txtStatus.className = "text-xs text-emerald-400 animate-pulse";
+        txtStatus.innerText = "Em marcha...";
+        txtStatus.className = "text-[11px] sm:text-xs text-emerald-400 animate-pulse";
         
         animationFrameId = requestAnimationFrame(globalSimulationLoop);
         smokeInterval = setInterval(emitSmoke, 140);
@@ -324,7 +341,7 @@
         btnPause.classList.add('hidden');
         btnPlay.classList.remove('hidden');
         txtStatus.innerText = "Simulação pausada";
-        txtStatus.className = "text-xs text-gray-400";
+        txtStatus.className = "text-[11px] sm:text-xs text-gray-400";
     }
 
     function endSimulation() {
@@ -333,8 +350,8 @@
         clearInterval(smokeInterval);
         btnPause.classList.add('hidden');
         btnPlay.classList.remove('hidden');
-        txtStatus.innerText = "Viagem encerrada com sucesso!";
-        txtStatus.className = "text-xs text-emerald-400 font-bold";
+        txtStatus.innerText = "Viagem encerrada!";
+        txtStatus.className = "text-[11px] sm:text-xs text-emerald-400 font-bold";
     }
 
     function resetSimulation() {
@@ -353,7 +370,6 @@
     btnPause.addEventListener('click', pauseSimulation);
     btnReset.addEventListener('click', resetSimulation);
 
-    // Inicialização da Telemetria e controle de render da fumaça ao arrastar o mapa
     updateTelemetria(gpxData[0].ele, 0);
     map.on('move', () => document.querySelectorAll('.smoke-particle').forEach(el => el.remove()));
 </script>
