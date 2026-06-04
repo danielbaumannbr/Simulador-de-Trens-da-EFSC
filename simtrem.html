@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Maria Fumaça | Painel com Marcha ao Lado do Maneco</title>
+    <title>Maria Fumaça | Painel de Comando com Mapa Gratuito</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -78,8 +78,17 @@
             0% { transform: scale(0.2) translate(0,0); opacity: 0.8; filter: blur(2px);}
             100% { transform: scale(2.5) translate(-30px, -60px); opacity: 0; filter: blur(12px);}
         }
-        .leaflet-control-zoom { border: none !important; background: rgba(0,0,0,0.7) !important; backdrop-filter: blur(4px); border-radius: 16px !important; }
-        .leaflet-control-zoom a { background: #1e1e1e !important; color: #f59e0b !important; border-color: #854d0e !important; }
+        .leaflet-control-zoom {
+            border: none !important;
+            background: rgba(0,0,0,0.7) !important;
+            backdrop-filter: blur(4px);
+            border-radius: 16px !important;
+        }
+        .leaflet-control-zoom a {
+            background: #1e1e1e !important;
+            color: #f59e0b !important;
+            border-color: #854d0e !important;
+        }
     </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden p-3 md:p-4 min-h-screen flex items-center justify-center">
@@ -120,9 +129,8 @@
                 </div>
             </div>
 
-            <!-- LINHA: MANECO (REGULADOR) ao lado da MARCHA VERTICAL -->
+            <!-- LINHA: MANECO ao lado da MARCHA VERTICAL -->
             <div class="grid grid-cols-3 gap-4 items-stretch">
-                <!-- Coluna esquerda: Maneco (2/3 da largura) -->
                 <div class="col-span-2 bg-black/50 p-3 rounded-xl border border-amber-900/50 flex flex-col">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-xs font-vintage text-amber-500">🚀 MANECO (REGULADOR)</span>
@@ -136,7 +144,6 @@
                         <button onclick="jogarAreia()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-amber-400 text-[10px] px-2 py-1 rounded-lg flex items-center justify-center gap-1"><i class="fa-solid fa-box-tissue"></i> AREIA</button>
                     </div>
                 </div>
-                <!-- Coluna direita: Marcha vertical -->
                 <div class="bg-black/50 p-2 rounded-xl border border-amber-900/50 flex flex-col items-center justify-center">
                     <div class="text-[9px] text-amber-500 font-vintage mb-1">MARCHA</div>
                     <div class="marcha-vertical-lateral w-full">
@@ -147,7 +154,7 @@
                 </div>
             </div>
 
-            <!-- FREIO e condição do trilho (abaixo) -->
+            <!-- FREIO e condição do trilho -->
             <div class="bg-black/50 p-3 rounded-xl border border-amber-900/50 flex items-center justify-between gap-3 flex-wrap">
                 <div class="flex-1">
                     <div class="text-[9px] text-amber-500 font-vintage mb-1">FREIO PNEUMÁTICO</div>
@@ -183,19 +190,20 @@
             
             <!-- Botão reiniciar -->
             <div class="bg-black/30 p-2 rounded-lg border border-amber-900/30 text-[9px] text-amber-500/80 font-mono flex justify-between items-center">
-                <span><i class="fa-regular fa-clock"></i> Maneco gradual (+10% máx) | Marcha vertical ao lado</span>
+                <span><i class="fa-regular fa-clock"></i> Maneco gradual (+10% máx) | Marcha vertical</span>
                 <button id="btn-reset" class="bg-zinc-800 px-3 py-1 rounded text-[9px] text-white hover:bg-zinc-700 transition"><i class="fa-regular fa-arrow-rotate-left"></i> Reiniciar</button>
             </div>
         </div>
 
-        <!-- MAPA GPS (lado direito) -->
+        <!-- MAPA GRATUITO COM LEAFLET (OPENSTREETMAP - SEM API KEY) -->
         <div class="lg:col-span-5 relative">
             <div class="map-container shadow-2xl">
                 <div id="map" class="w-full h-[460px] md:h-[540px] lg:h-[85vh] z-0"></div>
             </div>
+            <!-- Overlay GPS -->
             <div class="absolute top-4 left-4 right-4 z-[1000] gps-card px-3 py-2 flex flex-wrap justify-between items-center gap-1">
                 <div class="flex gap-2 items-center">
-                    <div><i class="fa-solid fa-satellite-dish text-amber-400 text-xs"></i><span class="text-[8px] ml-1">GPS</span></div>
+                    <div><i class="fa-solid fa-satellite-dish text-amber-400 text-xs"></i><span class="text-[8px] ml-1">OSM</span></div>
                     <div><span class="text-[8px] text-zinc-400">Vel</span><div class="text-base font-digital font-bold" id="map-speed">0.0</div></div>
                     <div><span class="text-[8px] text-zinc-400">Press</span><div class="text-base font-digital text-amber-400" id="map-pressure">0</div></div>
                 </div>
@@ -209,7 +217,7 @@
         </div>
     </div>
 
-    <!-- CONSOLE -->
+    <!-- CONSOLE CRONOLÓGICO -->
     <div class="mt-4 bg-black/70 rounded-xl border border-amber-900/50 p-2 backdrop-blur-sm">
         <div class="flex items-center gap-2 text-amber-600 text-[9px] font-vintage"><i class="fa-solid fa-receipt"></i>REGISTRO DO MAQUINISTA</div>
         <div id="console-log" class="h-12 overflow-y-auto text-[9px] font-mono text-amber-400/80 pl-1 leading-relaxed"></div>
@@ -217,7 +225,7 @@
 </div>
 
 <script>
-    // ======================== DADOS GPX (MESMO TRAJETO) ========================
+    // ======================== DADOS GPX (TRAJETO REAL) ========================
     const gpxData = [
         {lat: -27.125254, lon: -49.515807, ele: 321.24}, {lat: -27.125153, lon: -49.515677, ele: 319.61},
         {lat: -27.12495, lon: -49.515497, ele: 314.18}, {lat: -27.124788, lon: -49.515406, ele: 310.36},
@@ -262,10 +270,15 @@
         velocidade: 0, patinando: false, condicaoTrilho: 'Seco', sinalizado: false
     };
     
-    // Mapa
+    // Mapa gratuito Leaflet (OpenStreetMap)
     const map = L.map('map', { zoomControl: true }).setView(pathCoords[0], 14);
-    L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-    L.polyline(pathCoords, { color: '#f59e0b', weight: 6 }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    // Desenho dos trilhos
+    L.polyline(pathCoords, { color: '#f59e0b', weight: 6, opacity: 0.95 }).addTo(map);
+    L.polyline(pathCoords, { color: '#ffd966', weight: 2, opacity: 0.7, dashArray: '8,5' }).addTo(map);
     const trainIcon = L.divIcon({ html: `<div class="flex items-center justify-center w-10 h-10 bg-amber-600 rounded-full border-2 border-black shadow-xl text-black text-lg" id="train-marker"><i class="fa-solid fa-train"></i></div>`, iconSize: [40,40], iconAnchor: [20,20] });
     const trainMarker = L.marker(pathCoords[0], { icon: trainIcon }).addTo(map);
     
@@ -303,7 +316,7 @@
         let atual = trem.acelerador;
         let delta = novo - atual;
         if (delta > 0) {
-            let maxIncremento = Math.max(5, Math.floor(atual * 0.1)); // 10% do atual, mínimo 5
+            let maxIncremento = Math.max(5, Math.floor(atual * 0.1));
             if (delta > maxIncremento) {
                 quebrarLocomotiva("AVANÇO BRUSCO DO MANECO (>10% da posição atual)");
                 return;
@@ -371,7 +384,7 @@
         else led.className = "w-2 h-2 rounded-full bg-red-600 animate-pulse";
         if (trem.pressao < 48 && trem.acelerador > 5) document.getElementById("alerta-pressao").classList.remove("hidden");
         else document.getElementById("alerta-pressao").classList.add("hidden");
-        // Atualizar botões marcha vertical
+        // Botões marcha vertical
         const btnRe = document.getElementById("btn-marcha-re");
         const btnNeu = document.getElementById("btn-marcha-neutro");
         const btnFre = document.getElementById("btn-marcha-frente");
@@ -391,7 +404,7 @@
         updateSpeedAndSafety();
     }
     
-    // ========== FÍSICA E MOVIMENTO ==========
+    // ========== FÍSICA E MOVIMENTO GPS ==========
     function cicloFisica() {
         if (!simulationActive) return;
         if (trem.temperatura > 70) { 
@@ -461,7 +474,7 @@
     function finalizarTrajeto(){ isPlaying=false; cancelAnimationFrame(animFrame); clearInterval(smokeInt); logar("🏁 Destino alcançado!"); trem.velocidade=0; atualizarInterface(); }
     function emitirFumaca(){ if(!simulationActive || Math.abs(trem.velocidade)<0.9) return; const ponto=trainMarker.getLatLng(); const screenPos=map.latLngToContainerPoint(ponto); const fumaça=document.createElement('div'); fumaça.className='smoke-particle'; let s=Math.random()*12+6; fumaça.style.cssText=`width:${s}px;height:${s}px;left:${screenPos.x-s/2}px;top:${screenPos.y-s/2}px;position:absolute;`; document.body.appendChild(fumaça); setTimeout(()=>fumaça.remove(),1600); }
     
-    // ========== COMANDOS DO USUÁRIO ==========
+    // ========== COMANDOS USUÁRIO ==========
     function adicionarLenha(){ if(!simulationActive) return; if(trem.lenha<96) trem.lenha=Math.min(100, trem.lenha+20); trem.temperatura = Math.min(440, trem.temperatura+80); logar("🔥 Lenha adicionada."); atualizarInterface(); }
     function abastecerAgua(){ if(!simulationActive) return; if(Math.abs(trem.velocidade)>1) {logar("🚫 Movimento impede reabastecimento."); return;} trem.aguaReservatorio=2500; logar("💧 Tender cheio."); atualizarInterface(); }
     function acionarInjetor(){ if(!simulationActive) return; if(trem.aguaReservatorio>=130){ trem.aguaReservatorio-=130; trem.aguaCaldeira=Math.min(100,trem.aguaCaldeira+14); trem.temperatura=Math.max(40,trem.temperatura-24); trem.pressao=Math.max(0,trem.pressao-7); logar("💨 Injetor acionado."); }else logar("❌ Sem água!"); atualizarInterface(); }
@@ -485,7 +498,7 @@
         botoes.forEach(btn => { btn.disabled = false; btn.classList.remove("opacity-50", "cursor-not-allowed"); });
         document.getElementById("lbl-acelerador").innerText = "0%";
         document.getElementById("gps-distancia").innerHTML = "0 m";
-        logar("🔄 SIMULAÇÃO REINICIADA. Maneco gradual (+10% máx) | Marcha vertical ao lado.");
+        logar("🔄 SIMULAÇÃO REINICIADA. Mapa gratuito OpenStreetMap. Maneco gradual.");
         atualizarInterface();
         document.querySelectorAll('.fixed.bg-red-900').forEach(el=>el.remove());
     }
@@ -497,7 +510,7 @@
     window.validarAumentoManeco = validarAumentoManeco;
     window.adicionarLenha=adicionarLenha; window.abastecerAgua=abastecerAgua; window.acionarInjetor=acionarInjetor; window.mudarMarcha=mudarMarcha;
     window.alternarFreio=alternarFreio; window.tocarSinal=tocarSinal; window.jogarAreia=jogarAreia; window.reiniciarSimulacao=reiniciarSimulacao;
-    atualizarInterface(); logar("✅ Sistema pronto. Marcha vertical ao lado do maneco. Controle gradual do regulador (+10% max).");
+    atualizarInterface(); logar("✅ Sistema pronto. Mapa gratuito (OpenStreetMap) sem necessidade de chave. Maneco gradual e marcha vertical.");
 </script>
 </body>
 </html>
