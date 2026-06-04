@@ -354,9 +354,19 @@
     function cicloFisica() {
         if (!simulationActive) return;
         
+        // *** CORREÇÃO: Garantir que o trem permaneça parado com freio aplicado ***
+        if (trem.freioAplicado && Math.abs(trem.velocidade) < 0.5) {
+            trem.velocidade = 0;
+            // Não aplica nenhuma aceleração enquanto o freio de estacionamento estiver ativo
+            // (simula o freio segurando o trem mesmo em rampa)
+            atualizarGradiente();
+            atualizarInterface();
+            return;
+        }
+        
         atualizarGradiente();
         
-        // 1. Caldeira e pressão (mesmo de antes, estável)
+        // 1. Caldeira e pressão
         if (trem.temperatura > 70) { 
             trem.lenha = Math.max(0, trem.lenha - 0.22);
             if (trem.aguaCaldeira > 2) { 
@@ -381,63 +391,44 @@
             if (trem.marcha === 'RE') forcaMotor = -forcaMotor;
         }
         
-        // 3. Força gravitacional (sempre presente)
-        let forcaGrav = MASSA_TON * g * currentGradiente;  // kN, positivo = puxa para ré em subida
+        // 3. Força gravitacional
+        let forcaGrav = MASSA_TON * g * currentGradiente;  // kN
         
-        // 4. Força de atrito de rolamento (sempre presente, simula resistência natural)
+        // 4. Força de atrito de rolamento
         let forcaAtritoBase = 8 * (1 + Math.abs(trem.velocidade)/40);
         
-        // 5. Força de freio (aplicada gradualmente quando freio acionado)
+        // 5. Força de freio (apenas se o freio estiver aplicado e o trem estiver se movendo)
         let forcaFreio = 0;
-        if (trem.freioAplicado) {
-            // Freio gradual: força de frenagem proporcional à velocidade (efeito realista) e com limite máximo
-            // Para trem parado, freio não cria força negativa
-            if (Math.abs(trem.velocidade) > 0.1) {
-                // Quanto mais rápido, maior a força de frenagem (até o limite FORCA_FREIO_MAX)
-                forcaFreio = Math.min(FORCA_FREIO_MAX, 12 + 0.8 * Math.abs(trem.velocidade));
-                // Direção contrária ao movimento
-                if (trem.velocidade > 0) forcaFreio = -forcaFreio;
-                else if (trem.velocidade < 0) forcaFreio = +forcaFreio;
-            } else {
-                // Se está praticamente parado, o freio mantém imobilizado (impede qualquer aceleração residual)
-                forcaFreio = 0;
-                // Mas também precisamos garantir que forças externas (gravidade) não movam o trem com freio aplicado
-                // Vamos anular a gravidade e o motor se o freio estiver acionado e velocidade zero
-                if (Math.abs(trem.velocidade) < 0.05) {
-                    // Força resultante será zerada mais adiante
-                }
-            }
+        if (trem.freioAplicado && Math.abs(trem.velocidade) > 0.1) {
+            forcaFreio = Math.min(FORCA_FREIO_MAX, 12 + 0.8 * Math.abs(trem.velocidade));
+            if (trem.velocidade > 0) forcaFreio = -forcaFreio;
+            else if (trem.velocidade < 0) forcaFreio = +forcaFreio;
         }
         
-        // 6. Resultante das forças (em kN)
+        // 6. Resultante
         let forcaResultante = forcaMotor - forcaGrav - forcaAtritoBase * Math.sign(trem.velocidade || 1) + forcaFreio;
         
-        // Se o freio estiver aplicado e a velocidade for muito baixa, evita que o trem comece a se mover por gravidade
+        // Se o freio estiver aplicado e a velocidade muito baixa, evita movimento por gravidade
         if (trem.freioAplicado && Math.abs(trem.velocidade) < 0.2 && Math.abs(forcaResultante) < FORCA_FREIO_MAX/2) {
             forcaResultante = 0;
             trem.velocidade = 0;
         }
         
-        // Aceleração a = F / m  (m em toneladas, F em kN -> a = F / M em m/s²)
         let aceleracao = forcaResultante / MASSA_TON;
-        // Limitar aceleração/desaceleração máxima para estabilidade
         aceleracao = Math.min(2.5, Math.max(-3.0, aceleracao));
         
-        // Atualiza velocidade
-        let novaVelocidade = trem.velocidade + aceleracao * 0.98; // 0.98s ~ intervalo do ciclo
-        // Pequena inércia para evitar oscilações
+        let novaVelocidade = trem.velocidade + aceleracao * 0.98;
         trem.velocidade = novaVelocidade;
         
-        // Resistência aerodinâmica extra (para alta velocidade)
+        // Resistência aerodinâmica extra
         let resistencia = 0.018 * Math.abs(trem.velocidade) * trem.velocidade;
         if (trem.velocidade > 0) trem.velocidade = Math.max(0, trem.velocidade - resistencia * 0.1);
         else if (trem.velocidade < 0) trem.velocidade = Math.min(0, trem.velocidade + resistencia * 0.1);
         
-        // Limites de velocidade (60 km/h para frente, 32 km/h para ré)
         if (trem.velocidade > 60) trem.velocidade = 60;
         if (trem.velocidade < -32) trem.velocidade = -32;
         
-        // Patinação (apenas em aceleração forte e trilho molhado)
+        // Patinação
         if (Math.abs(aceleracao) > 2.2 && trem.condicaoTrilho === 'Molhado' && Math.random()<0.3 && !trem.freioAplicado) {
             trem.patinando = true;
             logar("⚠ Rodas patinando na rampa!");
