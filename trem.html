@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Maria Fumaça</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        .font-digital { font-family: 'Share Tech Mono', monospace; }
+    </style>
+</head>
+<body class="bg-zinc-900 text-zinc-100 min-h-screen p-4 md:p-8 font-sans selection:bg-amber-500 selection:text-black">
+
+    <div class="max-w-6xl mx-auto bg-zinc-800 border-4 border-zinc-700 rounded-xl shadow-2xl overflow-hidden">
+        
+        <header class="bg-zinc-950 p-4 border-b-4 border-zinc-700 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-train text-amber-500 text-3xl animate-pulse"></i>
+                <div>
+                    <h1 class="text-xl font-bold uppercase tracking-wider text-amber-500">Cabine de Comando</h1>
+                    <p class="text-xs text-zinc-400">Simulador de Locomotiva a Vapor (EFSC 1936)</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <div class="bg-zinc-900 px-4 py-2 rounded border border-zinc-700 text-center min-w-[120px]">
+                    <span class="text-[10px] uppercase text-zinc-400 block">Status</span>
+                    <span id="txt-status" class="text-sm font-bold text-red-500 uppercase">Parada</span>
+                </div>
+                <div class="bg-zinc-900 px-4 py-2 rounded border border-zinc-700 text-center min-w-[120px]">
+                    <span class="text-[10px] uppercase text-zinc-400 block">Velocidade</span>
+                    <span id="txt-velocidade" class="text-xl font-digital text-amber-400">0 km/h</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+            
+            <div class="bg-zinc-900/50 p-4 rounded-lg border border-zinc-700 flex flex-col gap-5">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-700 pb-2">1. Caldeira & Fluidos</h2>
+                
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span>Reservatório de Água:</span>
+                        <span id="lbl-agua-res" class="font-bold">2500 L</span>
+                    </div>
+                    <div class="w-full bg-zinc-950 rounded-full h-4 overflow-hidden border border-zinc-700">
+                        <div id="bar-agua-res" class="bg-blue-600 h-full transition-all duration-300" style="width: 100%"></div>
+                    </div>
+                    <button onclick="abastecerAgua()" class="mt-2 w-full bg-blue-900 hover:bg-blue-800 text-blue-200 text-xs py-1 px-2 rounded border border-blue-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-faucet-drip"></i> Reabastecer Reservatório (Estação)
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                    <span class="text-xs text-zinc-400 block mb-2">Nível da Caldeira (Torneirinhas):</span>
+                    <div class="flex justify-around items-center">
+                        <div class="text-center">
+                            <span class="text-[10px] block text-zinc-500">Alta</span>
+                            <div id="led-torneira-alta" class="w-4 h-4 rounded-full bg-zinc-800 mx-auto my-1 border border-zinc-700"></div>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] block text-zinc-500">Média</span>
+                            <div id="led-torneira-media" class="w-4 h-4 rounded-full bg-zinc-800 mx-auto my-1 border border-zinc-700"></div>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[10px] block text-zinc-500">Baixa</span>
+                            <div id="led-torneira-baixa" class="w-4 h-4 rounded-full bg-zinc-800 mx-auto my-1 border border-zinc-700"></div>
+                        </div>
+                    </div>
+                    <button onclick="acionarInjetor()" class="mt-3 w-full bg-teal-900 hover:bg-teal-800 text-teal-200 text-xs py-1.5 px-2 rounded border border-teal-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pump-soap"></i> Acionar Injetor de Água
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded border border-zinc-800 flex flex-col gap-2">
+                    <div class="flex justify-between text-xs">
+                        <span>Temperatura da Fornalha:</span>
+                        <span id="lbl-temp" class="text-orange-400 font-bold">25 °C</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] text-zinc-500 block">Lenha Disponível: <span id="lbl-lenha">100%</span></span>
+                            <div class="w-full bg-zinc-900 h-2 rounded-full overflow-hidden mt-1 border border-zinc-800">
+                                <div id="bar-lenha" class="bg-amber-800 h-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <button onclick="adicionarLenha()" class="bg-orange-700 hover:bg-orange-600 text-white text-xs py-2 px-3 rounded font-bold transition flex flex-col items-center min-w-[70px]">
+                            <i class="fa-solid fa-fire"></i>
+                            <span>+ Lenha</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900/50 p-4 rounded-lg border border-zinc-700 flex flex-col gap-5 justify-between">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-700 pb-2 mb-4">2. Pressão & Direção</h2>
+                    
+                    <div class="flex flex-col items-center justify-center p-4 bg-zinc-950 rounded-lg border border-zinc-800 mb-4">
+                        <span class="text-xs uppercase text-zinc-400 tracking-wider mb-1">Manômetro de Vapor</span>
+                        <div class="text-4xl font-digital text-orange-500" id="lbl-pressao">0 PSI</div>
+                        <span class="text-[10px] text-zinc-500 mt-1">Mínimo para mover: 50 PSI</span>
+                        <div id="alerta-pressao" class="mt-2 text-[11px] text-red-400 font-bold uppercase animate-pulse hidden">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Pressão Insuficiente!
+                        </div>
+                    </div>
+
+                    <div class="bg-zinc-950 p-3 rounded border border-zinc-800 mb-4">
+                        <label class="text-xs text-zinc-400 block mb-2">Alavanca de Marcha (Direção):</label>
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <button id="btn-marcha-re" onclick="mudarMarcha('RE')" class="py-2 rounded bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 transition font-bold">RÉ</button>
+                            <button id="btn-marcha-neutro" onclick="mudarMarcha('NEUTRO')" class="py-2 rounded bg-amber-600 text-black border border-amber-500 font-bold">NEUTRO</button>
+                            <button id="btn-marcha-frente" onclick="mudarMarcha('FRENTE')" class="py-2 rounded bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 transition font-bold">FRENTE</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                        <label class="text-xs text-zinc-400 block mb-2">Freio de Ar Comprimido:</label>
+                        <button id="btn-freio" onclick="alternarFreio()" class="w-full bg-red-700 hover:bg-red-600 text-white py-2 px-4 rounded font-bold transition flex items-center justify-center gap-2 uppercase tracking-wide text-sm">
+                            <i class="fa-solid fa-circle-stop"></i> <span>Freio Aplicado</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded border border-zinc-800">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-zinc-400">Condição do Trilho: <span id="lbl-trilho" class="font-bold text-green-400">Seco</span></span>
+                        <span id="lbl-patinando" class="text-xs font-bold text-amber-500 hidden animate-bounce"><i class="fa-solid fa-留下"></i> Rodas Patinando!</span>
+                    </div>
+                    <button onclick="jogarAreia()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs py-2 px-3 rounded border border-zinc-600 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-box-tissue"></i> Liberar Areia nos Trilhos (Domo)
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-zinc-900/50 p-4 rounded-lg border border-zinc-700 flex flex-col gap-5">
+                <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-700 pb-2">3. Aceleração & Sinais</h2>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="tocarSinal('apito')" class="bg-zinc-950 hover:bg-zinc-900 text-amber-400 border border-zinc-700 p-4 rounded text-center transition flex flex-col items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-volume-high text-xl"></i>
+                        <span class="text-xs font-bold uppercase tracking-wider">Apito</span>
+                    </button>
+                    <button onclick="tocarSinal('sino')" class="bg-zinc-950 hover:bg-zinc-900 text-amber-400 border border-zinc-700 p-4 rounded text-center transition flex flex-col items-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-bell text-xl"></i>
+                        <span class="text-xs font-bold uppercase tracking-wider">Sino</span>
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 p-4 rounded border border-zinc-800 flex flex-col items-center flex-1 justify-center">
+                    <label for="slider-acelerador" class="text-xs text-zinc-400 uppercase tracking-wider mb-2 block text-center">Acelerador (Manequim)</label>
+                    <div class="flex items-center gap-4 w-full h-32 justify-center">
+                        <span class="text-xs text-zinc-500 font-bold">FECHADO</span>
+                        <input type="range" id="slider-acelerador" min="0" max="100" value="0" step="5" oninput="atualizarAcelerador(this.value)"
+                               class="h-full accent-amber-500 cursor-pointer rounded-lg appearance-none bg-zinc-800 w-4" style="writing-mode: bt-lr; -webkit-appearance: slider-vertical;">
+                        <span class="text-xs text-orange-500 font-bold">TOTAL</span>
+                    </div>
+                    <div class="text-center mt-3">
+                        <span class="text-xs text-zinc-400">Abertura: </span>
+                        <span id="lbl-acelerador" class="text-xl font-digital text-amber-400">0%</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <footer class="bg-zinc-950 border-t-4 border-zinc-700 p-4">
+            <span class="text-xs text-zinc-500 font-bold uppercase tracking-wider block mb-2"><i class="fa-solid fa-terminal mr-1"></i> Diário de Bordo do Maquinista:</span>
+            <div id="console-log" class="h-28 bg-black text-green-500 font-digital p-3 text-xs overflow-y-auto rounded border border-zinc-800 space-y-1">
+                </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // ESTADO GLOBAL DA LOCOMOTIVA
+        const trem = {
+            aguaReservatorio: 2500, // Litros
+            aguaCaldeira: 40,       // Porcentagem (0 a 100)
+            lenha: 100,             // Porcentagem
+            temperatura: 25,        // Celsius
+            pressao: 0,             // PSI
+            marcha: 'NEUTRO',       // RE, NEUTRO, FRENTE
+            freioAplicado: true,    // Boolean
+            acelerador: 0,          // Porcentagem
+            velocidade: 0,          // km/h
+            patinando: false,
+            condicaoTrilho: 'Seco', // Seco, Molhado
+            sinalizado: false       // Se tocou sino/apito antes de partir
+        };
+
+        // Inicialização
+        document.addEventListener("DOMContentLoaded", () => {
+            logar("Cabine inicializada. Abasteça a fornalha com lenha para erguer pressão.");
+            atualizarInterface();
+            
+            // Loop principal de física (roda a cada 1 segundo)
+            setInterval(cicloFisica, 1000);
+            
+            // Evento aleatório para mudar o clima/trilho a cada 30 segundos
+            setInterval(alterarClima, 30000);
+        });
+
+        // FUNÇÃO DE IMPRESSÃO NO CONSOLE
+        function logar(mensagem) {
+            const consoleBox = document.getElementById("console-log");
+            const agora = new Date().toLocaleTimeString('pt-BR');
+            consoleBox.innerHTML += `<div>[${agora}] -> ${mensagem}</div>`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        // COMANDOS DO USUÁRIO
+        function adicionarLenha() {
+            if (trem.lenha <= 0) {
+                logar("⚠️ Estoque geral de lenha esgotado!");
+                return;
+            }
+            trem.temperatura = Math.min(trem.temperatura + 80, 450);
+            logar("🪵 Lenha adicionada à fornalha! O fogo aquece a caldeira.");
+            atualizarInterface();
+        }
+
+        function abastecerAgua() {
+            if (trem.velocidade > 0) {
+                logar("❌ Você não pode abastecer o reservatório externo com o trem em movimento!");
+                return;
+            }
+            trem.aguaReservatorio = 2500;
+            logar("💧 Reservatório de água reabastecido completamente (2.500 Litros).");
+            atualizarInterface();
+        }
+
+        function acionarInjetor() {
+            if (trem.aguaReservatorio >= 100) {
+                trem.aguaReservatorio -= 150;
+                trem.aguaCaldeira = Math.min(trem.aguaCaldeira + 15, 100);
+                logar("💉 Injetor acionado: transferindo água do reservatório para a caldeira.");
+                // Injetar água fria derruba um pouco a pressão e temperatura
+                trem.temperatura = Math.max(25, trem.temperatura - 30);
+                trem.pressao = Math.max(0, trem.pressao - 10);
+            } else {
+                logar("❌ Água insuficiente no reservatório para injetar na caldeira!");
+            }
+            atualizarInterface();
+        }
+
+        function mudarMarcha(novaMarcha) {
+            trem.marcha = novaMarcha;
+            logar(`⚙️ Alavanca de marcha configurada para: ${novaMarcha}`);
+            atualizarInterface();
+        }
+
+        function alternarFreio() {
+            trem.freioAplicado = !trem.freioAplicado;
+            logar(trem.freioAplicado ? "🛑 Freios de ar comprimido APLICADOS." : "🟢 Freios LIBERADOS.");
+            atualizarInterface();
+        }
+
+        function tocarSinal(tipo) {
+            trem.sinalizado = true;
+            if (tipo === 'apito') {
+                logar("🚂 FUUUUUUUUIiiiiiiip! O apito ecoa cortando os trilhos.");
+            } else if (tipo === 'sino') {
+                logar("🔔 Blen! Blen! Blen! O sino avisa a plataforma.");
+            }
+        }
+
+        function jogarAreia() {
+            if (trem.patinando) {
+                trem.patinando = false;
+                logar("⏳ Areia jogada sob as rodas! Tração recuperada.");
+            } else {
+                logar("⏳ Areia aplicada nos trilhos preventivamente.");
+            }
+            atualizarInterface();
+        }
+
+        function atualizarAcelerador(valor) {
+            trem.acelerador = parseInt(valor);
+            document.getElementById("lbl-acelerador").innerText = valor + "%";
+            
+            if (trem.acelerador > 0 && trem.pressao < 50) {
+                document.getElementById("alerta-pressao").classList.remove("hidden");
+            } else {
+                document.getElementById("alerta-pressao").classList.add("hidden");
+            }
+        }
+
+        // SIMULAÇÃO DA FÍSICA DO VAPOR
+        function cicloFisica() {
+            // 1. O fogo queima a lenha lentamente se estiver quente
+            if (trem.temperatura > 100) {
+                trem.lenha = Math.max(0, trem.lenha - 0.5);
+                // Gerar pressão com base na temperatura e água na caldeira
+                if (trem.aguaCaldeira > 10) {
+                    trem.pressao = Math.min(trem.pressao + Math.floor(trem.temperatura / 80), 200);
+                    // Consumir água da caldeira ao gerar vapor
+                    trem.aguaCaldeira = Math.max(0, trem.aguaCaldeira - (trem.pressao * 0.01));
+                }
+                // Resfriamento natural da fornalha
+                trem.temperatura = Math.max(25, trem.temperatura - 3);
+            } else {
+                // Sem lenha ou fogo baixo, a pressão cai gradualmente
+                trem.pressao = Math.max(0, trem.pressao - 1);
+            }
+
+            // Consumo extra de vapor se o acelerador estiver aberto
+            if (trem.acelerador > 0) {
+                trem.pressao = Math.max(0, trem.pressao - (trem.acelerador * 0.05));
+            }
+
+            // 2. Lógica de Movimentação e Velocidade
+            let podeMover = true;
+
+            // Validações baseadas no algoritmo fornecido:
+            if (trem.pressao < 50 && trem.acelerador > 0) {
+                podeMover = false;
+                logar("⚠️ Pressão abaixo de 50 PSI. O vapor não tem força para empurrar os pistões!");
+                trem.acelerador = 0;
+                document.getElementById("slider-acelerador").value = 0;
+                document.getElementById("lbl-acelerador").innerText = "0%";
+            }
+
+            if (trem.freioAplicado && trem.acelerador > 0) {
+                podeMover = false;
+                logar("⚠️ As rodas estão travadas pelo freio de ar comprimido!");
+            }
+
+            if (trem.marcha === 'NEUTRO' && trem.acelerador > 0) {
+                podeMover = false;
+                logar("⚠️ A marcha está em Neutro. O vapor escapa sem tracionar as rodas!");
+            }
+
+            // Se tentar partir sem avisar
+            if (podeMover && trem.acelerador > 0 && !trem.sinalizado && trem.velocidade === 0) {
+                logar("📢 Atenção: É norma de segurança tocar o sino ou apito antes da partida!");
+            }
+
+            // Cálculo da velocidade de cruzeiro
+            if (podeMover && trem.acelerador > 0 && trem.pressao >= 50) {
+                // Probabilidade de patinar em trilho molhado
+                if (trem.condicaoTrilho === 'Molhado' && Math.random() > 0.6 && !trem.patinando) {
+                    trem.patinando = true;
+                    logar("⚠️ As rodas começaram a PATINAR no trilho úmido! Use o domo de areia!");
+                }
+
+                let fatorTracao = trem.patinando ? 0.1 : 1.0;
+                let direcaoFator = trem.marcha === 'RE' ? -1 : 1;
+                
+                let velAlvo = (trem.acelerador * (trem.pressao / 100)) * 0.4 * direcaoFator * fatorTracao;
+                
+                // Ganho de inércia suave
+                trem.velocidade += (velAlvo - trem.velocidade) * 0.1;
+            } else {
+                // Frenagem ou perda natural de velocidade por atrito/inércia
+                let taxaDesaceleracao = trem.freioAplicado ? 5 : 0.5;
+                if (trem.velocidade > 0) trem.velocidade = Math.max(0, trem.velocidade - taxaDesaceleracao);
+                if (trem.velocidade < 0) trem.velocidade = Math.min(0, trem.velocidade + taxaDesaceleracao);
+            }
+
+            atualizarInterface();
+        }
+
+        // EVENTO DE CLIMA ALEATÓRIO
+        function alterarClima() {
+            const climas = ['Seco', 'Seco', 'Molhado']; // Mais chances de seco
+            const novoClima = climas[Math.floor(Math.random() * climas.length)];
+            if (novoClima !== trem.condicaoTrilho) {
+                trem.condicaoTrilho = novoClima;
+                if (novoClima === 'Molhado') {
+                    logar("🌧️ Começou a garoar na região. Os trilhos estão úmidos e escorregadios!");
+                } else {
+                    logar("☀️ O tempo firmou. Os trilhos estão secos.");
+                }
+                atualizarInterface();
+            }
+        }
+
+        // ATUALIZAÇÃO DA INTERFACE GRÁFICA (RENDER)
+        function atualizarInterface() {
+            // Velocidade e Status Geral
+            const velAbs = Math.abs(Math.round(trem.velocidade));
+            document.getElementById("txt-velocidade").innerText = `${velAbs} km/h`;
+            
+            const statusTxt = document.getElementById("txt-status");
+            if (velAbs === 0) {
+                statusTxt.innerText = "Parada";
+                statusTxt.className = "text-sm font-bold text-red-500 uppercase";
+            } else {
+                statusTxt.innerText = trem.velocidade > 0 ? "Em Frente" : "Em Ré";
+                statusTxt.className = "text-sm font-bold text-green-500 uppercase";
+            }
+
+            // Reservatório de Água
+            document.getElementById("lbl-agua-res").innerText = `${Math.round(trem.aguaReservatorio)} L`;
+            document.getElementById("bar-agua-res").style.width = `${(trem.aguaReservatorio / 2500) * 100}%`;
+
+            // Torneirinhas de nível da caldeira
+            document.getElementById("led-torneira-alta").className = `w-4 h-4 rounded-full mx-auto my-1 border border-zinc-700 ${trem.aguaCaldeira > 75 ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]' : 'bg-zinc-800'}`;
+            document.getElementById("led-torneira-media").className = `w-4 h-4 rounded-full mx-auto my-1 border border-zinc-700 ${trem.aguaCaldeira > 35 ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-zinc-800'}`;
+            document.getElementById("led-torneira-baixa").className = `w-4 h-4 rounded-full mx-auto my-1 border border-zinc-700 ${trem.aguaCaldeira > 5 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)] animate-pulse' : 'bg-zinc-800'}`;
+
+            if(trem.aguaCaldeira <= 5) {
+                logar("⚠️ PERIGO: Nível crítico de água na caldeira! Risco de explosão ou superaquecimento se houver fogo!");
+            }
+
+            // Fornalha e Lenha
+            document.getElementById("lbl-temp").innerText = `${Math.round(trem.temperatura)} °C`;
+            document.getElementById("lbl-lenha").innerText = `${Math.round(trem.lenha)}%`;
+            document.getElementById("bar-lenha").style.width = `${trem.lenha}%`;
+
+            // Manômetro
+            document.getElementById("lbl-pressao").innerText = `${trem.pressao} PSI`;
+            const manometroLabel = document.getElementById("lbl-pressao");
+            if (trem.pressao >= 150) {
+                manometroLabel.className = "text-4xl font-digital text-red-500 animate-bounce";
+            } else if (trem.pressao >= 50) {
+                manometroLabel.className = "text-4xl font-digital text-green-400";
+            } else {
+                manometroLabel.className = "text-4xl font-digital text-orange-500";
+            }
+
+            // Alavancas de Direção UI
+            const btnRe = document.getElementById("btn-marcha-re");
+            const btnNeu = document.getElementById("btn-marcha-neutro");
+            const btnFre = document.getElementById("btn-marcha-frente");
+
+            [btnRe, btnNeu, btnFre].forEach(btn => btn.className = "py-2 rounded bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 transition font-bold");
+            if (trem.marcha === 'RE') btnRe.className = "py-2 rounded bg-amber-600 text-black border border-amber-500 font-bold";
+            if (trem.marcha === 'NEUTRO') btnNeu.className = "py-2 rounded bg-amber-600 text-black border border-amber-500 font-bold";
+            if (trem.marcha === 'FRENTE') btnFre.className = "py-2 rounded bg-amber-600 text-black border border-amber-500 font-bold";
+
+            // Freio UI
+            const btnFreio = document.getElementById("btn-freio");
+            if (trem.freioAplicado) {
+                btnFreio.className = "w-full bg-red-700 hover:bg-red-600 text-white py-2 px-4 rounded font-bold transition flex items-center justify-center gap-2 uppercase tracking-wide text-sm";
+                btnFreio.innerHTML = '<i class="fa-solid fa-circle-stop"></i> <span>Freio Aplicado</span>';
+            } else {
+                btnFreio.className = "w-full bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-green-500 py-2 px-4 rounded font-bold transition flex items-center justify-center gap-2 uppercase tracking-wide text-sm";
+                btnFreio.innerHTML = '<i class="fa-solid fa-circle-play"></i> <span>Freios Soltos</span>';
+            }
+
+            // Trilhos e Patinação UI
+            const lblTrilho = document.getElementById("lbl-trilho");
+            lblTrilho.innerText = trem.condicaoTrilho;
+            lblTrilho.className = trem.condicaoTrilho === 'Seco' ? 'font-bold text-green-400' : 'font-bold text-blue-400';
+            
+            const lblPatinando = document.getElementById("lbl-patinando");
+            if (trem.patinando) {
+                lblPatinando.classList.remove("hidden");
+            } else {
+                lblPatinando.classList.add("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
