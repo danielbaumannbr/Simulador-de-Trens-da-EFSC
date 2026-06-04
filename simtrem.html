@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Maria Fumaça · Temperatura Estável</title>
+    <title>Maria Fumaça · Freio Gradual Realista</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,7 +26,7 @@
         .marcha-stack { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
         .marcha-btn { background: #25252c; padding: 0.5rem 0; border-radius: 2rem; font-size: 0.7rem; font-weight: 600; text-align: center; cursor: pointer; border: 1px solid #3a3a44; }
         .marcha-btn.active { background: #ea580c; color: black; border-color: #ea580c; }
-        .speed-critical { color: #f97316; text-shadow: 0 0 2px #f9731666; }
+        .speed-critical { color: #f97316; }
         .speed-normal { color: #4ade80; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
@@ -40,8 +40,8 @@
         <div class="card-min px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-train text-amber-500 text-xl"></i>
-                <span class="font-semibold tracking-tight text-white">maria fumaça</span>
-                <span class="text-[11px] text-zinc-500">caldeira estável</span>
+                <span class="font-semibold tracking-tight text-white">Maria Fumaça</span>
+                <span class="text-[11px] text-zinc-500">Freio gradual realista</span>
             </div>
             <div class="bg-black/40 px-3 py-0.5 rounded-full border border-zinc-700">
                 <span class="text-[10px] uppercase font-mono text-zinc-400">estado</span>
@@ -49,7 +49,6 @@
             </div>
         </div>
 
-        <!-- Velocímetro + Pressão -->
         <div class="grid grid-cols-2 gap-3">
             <div class="card-min p-3 text-center">
                 <div class="text-[11px] uppercase tracking-wider text-zinc-400">velocidade</div>
@@ -64,14 +63,14 @@
             </div>
         </div>
 
-        <!-- MANECO (REGULADOR) - LIVRE -->
+        <!-- MANECO LIVRE -->
         <div class="card-min p-4 space-y-2">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-2"><i class="fa-solid fa-sliders-h text-orange-400 text-sm"></i><span class="text-xs font-medium">Regulador (Maneco)</span></div>
                 <span id="lbl-acelerador" class="font-mono font-bold text-orange-400 text-lg">0%</span>
             </div>
             <input type="range" id="slider-acelerador" min="0" max="100" value="0" step="1" class="w-full slider-min">
-            <div class="text-[9px] text-zinc-500 text-center">Ajuste livre — sem restrições</div>
+            <div class="text-[9px] text-zinc-500 text-center">Ajuste livre — força do vapor</div>
             <div class="flex gap-2 pt-1">
                 <button onclick="tocarSinal('apito')" class="btn-min flex-1 py-1.5 rounded-lg text-xs flex items-center justify-center gap-1"><i class="fa-regular fa-bell"></i> Apito</button>
                 <button onclick="tocarSinal('sino')" class="btn-min flex-1 py-1.5 rounded-lg text-xs flex items-center justify-center gap-1"><i class="fa-regular fa-bell"></i> Sino</button>
@@ -95,6 +94,7 @@
                 <div class="flex justify-between mt-2 text-[10px]">
                     <span>Trilho: <span id="lbl-trilho" class="text-emerald-400">Seco</span></span>
                     <span id="lbl-patinando" class="hidden text-amber-400 animate-pulse">⚠ PATINANDO!</span>
+                    <span id="lbl-gradiente" class="text-zinc-400"></span>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@
         </div>
 
         <div class="flex justify-between items-center card-min py-2 px-3">
-            <div class="text-[9px] text-zinc-500"><i class="fa-regular fa-clock"></i> Temperatura com resfriamento lento</div>
+            <div class="text-[9px] text-zinc-500"><i class="fa-regular fa-mountain"></i> Freio gradual (força de 65 kN)</div>
             <button id="btn-reset" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] px-4 py-1 rounded-full transition"><i class="fa-regular fa-arrow-rotate-left"></i> reiniciar tudo</button>
         </div>
     </div>
@@ -136,7 +136,7 @@
                 <div><i class="fa-regular fa-gauge-high"></i> <span id="map-speed" class="font-mono font-bold">0.0</span> km/h</div>
                 <div><i class="fa-regular fa-gauge"></i> <span id="map-pressure" class="font-mono">60</span> psi</div>
             </div>
-            <div class="text-right text-[10px] font-mono"><span id="gps-coord-lat">-27.1252</span> / <span id="gps-coord-lon">-49.5158</span><br><span id="gps-distancia">0m</span> · <span id="gps-altitude">321m</span></div>
+            <div class="text-right text-[10px] font-mono"><span id="gps-coord-lat">-27.125254</span> / <span id="gps-coord-lon">-49.515807</span><br><span id="gps-distancia">0m</span> · <span id="gps-altitude">321m</span></div>
         </div>
         <div class="absolute bottom-3 right-3 z-[1000] info-overlay-min flex gap-3 text-[10px] font-mono">
             <div><i class="fa-regular fa-sliders"></i> <span id="throttle-mini">0%</span></div>
@@ -152,7 +152,7 @@
 </div>
 
 <script>
-    // ================= TRAJETO GPX =================
+    // ================= GPX COMPLETO (TODOS OS PONTOS DO XML) =================
     const gpxData = [
         {lat: -27.125254, lon: -49.515807, ele: 321.24}, {lat: -27.125153, lon: -49.515677, ele: 319.61},
         {lat: -27.12495, lon: -49.515497, ele: 314.18}, {lat: -27.124788, lon: -49.515406, ele: 310.36},
@@ -161,7 +161,7 @@
         {lat: -27.12379, lon: -49.515221, ele: 307.38}, {lat: -27.123647, lon: -49.51525, ele: 307.34},
         {lat: -27.123613, lon: -49.515266, ele: 307.18}, {lat: -27.123096, lon: -49.515308, ele: 309.44},
         {lat: -27.122835, lon: -49.51528, ele: 311.94}, {lat: -27.122527, lon: -49.515218, ele: 312.92},
-        {lat: -27.12286, lon: -49.515143, ele: 314.73}, {lat: -27.122043, lon: -49.515113, ele: 314.89},
+        {lat: -27.122286, lon: -49.515143, ele: 314.73}, {lat: -27.122043, lon: -49.515113, ele: 314.89},
         {lat: -27.121711, lon: -49.51511, ele: 313.5}, {lat: -27.120679, lon: -49.515355, ele: 304.93},
         {lat: -27.120515, lon: -49.515398, ele: 304.1}, {lat: -27.120281, lon: -49.515409, ele: 304.18},
         {lat: -27.119903, lon: -49.51532, ele: 306.23}, {lat: -27.119419, lon: -49.515283, ele: 305.47},
@@ -175,22 +175,90 @@
         {lat: -27.113787, lon: -49.51683, ele: 288.7}, {lat: -27.113223, lon: -49.516701, ele: 291.26},
         {lat: -27.112856, lon: -49.516444, ele: 296.77}, {lat: -27.112541, lon: -49.516181, ele: 297.75},
         {lat: -27.111953, lon: -49.515602, ele: 299.06}, {lat: -27.111275, lon: -49.51499, ele: 306.34},
-        {lat: -27.110003, lon: -49.514545, ele: 312.77}, {lat: -27.110826, lon: -49.514293, ele: 312.54},
+        {lat: -27.111003, lon: -49.514545, ele: 312.77}, {lat: -27.110826, lon: -49.514293, ele: 312.54},
         {lat: -27.11064, lon: -49.513966, ele: 309.64}, {lat: -27.110368, lon: -49.513708, ele: 296.59},
         {lat: -27.110134, lon: -49.513563, ele: 293.02}, {lat: -27.109862, lon: -49.513424, ele: 291.01},
         {lat: -27.109451, lon: -49.513257, ele: 289.89}, {lat: -27.109301, lon: -49.513155, ele: 291.57},
-        {lat: -27.109112, lon: -49.513027, ele: 293.68}, {lat: -27.108864, lon: -49.512768, ele: 299.37}, 
-        {lat: -27.108678, lon: -49.512522, ele: 305.03}, {lat: -27.108534, lon: -49.512163, ele: 306.34}, 
-        {lat: -27.108382, lon: -49.51101, ele: 315.12}, {lat: -27.108253, lon: -49.510709, ele: 311.16}, 
-        {lat: -27.107921, lon: -49.510079, ele: 301.77}, {lat: -27.107857, lon: -49.509799, ele: 305.88}, 
-        {lat: -27.107794, lon: -49.509626, ele: 309.41}, {lat: -27.10767, lon: -49.509376, ele: 311.87}, 
-        {lat: -27.107551, lon: -49.509186, ele: 311.39}, {lat: -27.107434, lon: -49.509028, ele: 308.99}, 
-        {lat: -27.107272, lon: -49.508756, ele: 305.12}, {lat: -27.107154, lon: -49.508494, ele: 302.27}
+        {lat: -27.109112, lon: -49.513027, ele: 293.68}, {lat: -27.108864, lon: -49.512768, ele: 299.37},
+        {lat: -27.108678, lon: -49.512522, ele: 305.03}, {lat: -27.108534, lon: -49.512163, ele: 306.34},
+        {lat: -27.108382, lon: -49.51101, ele: 315.12}, {lat: -27.108253, lon: -49.510709, ele: 311.16},
+        {lat: -27.107921, lon: -49.510079, ele: 301.77}, {lat: -27.107857, lon: -49.509799, ele: 305.88},
+        {lat: -27.107794, lon: -49.509626, ele: 309.41}, {lat: -27.10767, lon: -49.509376, ele: 311.87},
+        {lat: -27.107551, lon: -49.509186, ele: 311.39}, {lat: -27.107434, lon: -49.509028, ele: 308.99},
+        {lat: -27.107272, lon: -49.508756, ele: 305.12}, {lat: -27.107154, lon: -49.508494, ele: 302.27},
+        {lat: -27.107068, lon: -49.508231, ele: 300.04}, {lat: -27.107057, lon: -49.507975, ele: 298.01},
+        {lat: -27.107074, lon: -49.507864, ele: 298.73}, {lat: -27.107088, lon: -49.507775, ele: 299.31},
+        {lat: -27.107143, lon: -49.507578, ele: 302.1}, {lat: -27.107226, lon: -49.507357, ele: 303.79},
+        {lat: -27.107303, lon: -49.507181, ele: 300.87}, {lat: -27.107424, lon: -49.507016, ele: 300.81},
+        {lat: -27.107632, lon: -49.506792, ele: 302.69}, {lat: -27.108835, lon: -49.505586, ele: 295.92},
+        {lat: -27.109575, lon: -49.504816, ele: 291.95}, {lat: -27.1098, lon: -49.504578, ele: 292.47},
+        {lat: -27.110054, lon: -49.504268, ele: 291.66}, {lat: -27.110329, lon: -49.50372, ele: 289.49},
+        {lat: -27.110534, lon: -49.503205, ele: 293.44}, {lat: -27.110544, lon: -49.503165, ele: 293.53},
+        {lat: -27.110678, lon: -49.502601, ele: 294.67}, {lat: -27.11072, lon: -49.502325, ele: 294.33},
+        {lat: -27.110724, lon: -49.501762, ele: 291.76}, {lat: -27.110708, lon: -49.501513, ele: 290.59},
+        {lat: -27.110651, lon: -49.50115, ele: 290.61}, {lat: -27.110545, lon: -49.500782, ele: 287.52},
+        {lat: -27.110388, lon: -49.500367, ele: 288.06}, {lat: -27.109657, lon: -49.498864, ele: 280.47},
+        {lat: -27.109384, lon: -49.498372, ele: 280.33}, {lat: -27.10921, lon: -49.498176, ele: 277.9},
+        {lat: -27.109026, lon: -49.498042, ele: 274.01}, {lat: -27.108657, lon: -49.497882, ele: 267.51},
+        {lat: -27.108607, lon: -49.497881, ele: 267.26}, {lat: -27.108063, lon: -49.497871, ele: 264.55},
+        {lat: -27.107193, lon: -49.497928, ele: 258.46}, {lat: -27.106378, lon: -49.498491, ele: 243.5},
+        {lat: -27.105789, lon: -49.498796, ele: 241.88}, {lat: -27.105234, lon: -49.499084, ele: 240.36},
+        {lat: -27.10434, lon: -49.499428, ele: 244.79}, {lat: -27.103673, lon: -49.499662, ele: 246.5},
+        {lat: -27.103122, lon: -49.499913, ele: 242.36}, {lat: -27.101794, lon: -49.500543, ele: 243.9},
+        {lat: -27.100782, lon: -49.501276, ele: 233.98}, {lat: -27.099776, lon: -49.502054, ele: 233.65},
+        {lat: -27.099464, lon: -49.502375, ele: 233.02}, {lat: -27.098998, lon: -49.502857, ele: 232.07},
+        {lat: -27.098463, lon: -49.503613, ele: 226.43}, {lat: -27.097838, lon: -49.504151, ele: 227.03},
+        {lat: -27.097789, lon: -49.504277, ele: 226.16}, {lat: -27.097352, lon: -49.505399, ele: 218.33},
+        {lat: -27.096331, lon: -49.506437, ele: 218.6}, {lat: -27.09563, lon: -49.506905, ele: 222.62},
+        {lat: -27.094081, lon: -49.507568, ele: 231.02}, {lat: -27.093635, lon: -49.5078, ele: 227.61},
+        {lat: -27.09288, lon: -49.508192, ele: 221.83}, {lat: -27.091818, lon: -49.508878, ele: 220.97},
+        {lat: -27.091151, lon: -49.509299, ele: 220.69}, {lat: -27.090784, lon: -49.509888, ele: 211.09},
+        {lat: -27.090346, lon: -49.510672, ele: 200.81}, {lat: -27.08963, lon: -49.511257, ele: 214.33},
+        {lat: -27.089464, lon: -49.511631, ele: 207.87}, {lat: -27.088769, lon: -49.512591, ele: 198.27},
+        {lat: -27.088429, lon: -49.512754, ele: 199.08}, {lat: -27.088096, lon: -49.51277, ele: 205.01},
+        {lat: -27.087668, lon: -49.512556, ele: 217.07}, {lat: -27.087096, lon: -49.512138, ele: 225.73},
+        {lat: -27.086304, lon: -49.511273, ele: 231.03}, {lat: -27.086033, lon: -49.510625, ele: 238.3},
+        {lat: -27.085874, lon: -49.509432, ele: 251.69}, {lat: -27.085717, lon: -49.508369, ele: 253.41},
+        {lat: -27.085596, lon: -49.507552, ele: 254.74}, {lat: -27.08536, lon: -49.506156, ele: 248.85},
+        {lat: -27.085197, lon: -49.50536, ele: 245.32}, {lat: -27.084849, lon: -49.504528, ele: 232.84},
+        {lat: -27.085168, lon: -49.503397, ele: 246.6}, {lat: -27.085124, lon: -49.503091, ele: 242.3},
+        {lat: -27.084957, lon: -49.50249, ele: 234.01}, {lat: -27.084443, lon: -49.501484, ele: 218.74},
+        {lat: -27.084318, lon: -49.501078, ele: 215.42}, {lat: -27.084261, lon: -49.500484, ele: 216.4},
+        {lat: -27.08436, lon: -49.499994, ele: 222.75}, {lat: -27.084408, lon: -49.498707, ele: 226.66},
+        {lat: -27.08429, lon: -49.498333, ele: 222.63}, {lat: -27.084054, lon: -49.497966, ele: 218.91},
+        {lat: -27.083608, lon: -49.497785, ele: 209.46}, {lat: -27.083575, lon: -49.497771, ele: 208.75},
+        {lat: -27.083075, lon: -49.497685, ele: 206.77}, {lat: -27.082714, lon: -49.497272, ele: 219.72},
+        {lat: -27.081936, lon: -49.496925, ele: 215.17}, {lat: -27.081223, lon: -49.496535, ele: 210.9},
+        {lat: -27.081056, lon: -49.496357, ele: 213.21}, {lat: -27.080865, lon: -49.496049, ele: 219.12},
+        {lat: -27.080722, lon: -49.49562, ele: 225.73}, {lat: -27.080729, lon: -49.495102, ele: 227.92},
+        {lat: -27.081, lon: -49.493893, ele: 232.01}, {lat: -27.080973, lon: -49.493694, ele: 230.54},
+        {lat: -27.080899, lon: -49.493163, ele: 226.63}, {lat: -27.080889, lon: -49.492383, ele: 224.02},
+        {lat: -27.080872, lon: -49.491705, ele: 217.69}, {lat: -27.081073, lon: -49.491112, ele: 220.94},
+        {lat: -27.081747, lon: -49.489045, ele: 224.72}, {lat: -27.082028, lon: -49.488199, ele: 225.31},
+        {lat: -27.082583, lon: -49.486783, ele: 226.47}, {lat: -27.083212, lon: -49.485878, ele: 214.94},
+        {lat: -27.084226, lon: -49.484857, ele: 200.56}, {lat: -27.084691, lon: -49.484581, ele: 211.62},
+        {lat: -27.085011, lon: -49.484392, ele: 219.22}, {lat: -27.085424, lon: -49.483511, ele: 205.04},
+        {lat: -27.085774, lon: -49.483121, ele: 193.49}, {lat: -27.086465, lon: -49.482829, ele: 189.99},
+        {lat: -27.086744, lon: -49.482763, ele: 190.16}, {lat: -27.087093, lon: -49.482639, ele: 191.43},
+        {lat: -27.08738, lon: -49.482445, ele: 197.63}, {lat: -27.08756, lon: -49.482214, ele: 200.97},
+        {lat: -27.087703, lon: -49.481895, ele: 200.45}, {lat: -27.0879, lon: -49.481251, ele: 200.11},
+        {lat: -27.087917, lon: -49.480824, ele: 199.12}, {lat: -27.088253, lon: -49.479321, ele: 193.07},
+        {lat: -27.088518, lon: -49.477865, ele: 194.79}, {lat: -27.088564, lon: -49.477693, ele: 194.88},
+        {lat: -27.088901, lon: -49.476409, ele: 195.5}, {lat: -27.08954, lon: -49.47535, ele: 192.99},
+        {lat: -27.090394, lon: -49.474435, ele: 195.76}, {lat: -27.09199, lon: -49.472797, ele: 182.03},
+        {lat: -27.092224, lon: -49.472495, ele: 179.52}, {lat: -27.092618, lon: -49.471988, ele: 175.3},
+        {lat: -27.093134, lon: -49.471512, ele: 176.02}, {lat: -27.093571, lon: -49.471261, ele: 176.01},
+        {lat: -27.093746, lon: -49.471194, ele: 177.94}, {lat: -27.093974, lon: -49.471048, ele: 179.99},
+        {lat: -27.094209, lon: -49.470796, ele: 179.6}, {lat: -27.094194, lon: -49.470812, ele: 179.62}
     ];
     const pathCoords = gpxData.map(p => [p.lat, p.lon]);
 
-    // ================= ESTADO =================
+    // ================= ESTADO DO TREM =================
     let simulationActive = true;
+    const MASSA_TON = 108; // locomotiva + tender + 4 vagões
+    const g = 9.81;
+    const FORCA_FREIO_MAX = 65; // kN (força de frenagem realista)
+    
     const trem = {
         aguaReservatorio: 2500, aguaCaldeira: 55, lenha: 100, temperatura: 200,
         pressao: 60,
@@ -207,14 +275,14 @@
     
     let isPlaying = false, animFrame = null;
     let currentSegment = 0, segProgress = 0, totalDistM = 0, lastTimestampAnim = null;
+    let currentGradiente = 0;
 
-    // ================= SEM REGRA DE % =================
+    // ================= UTILITÁRIOS =================
     function atualizarManeco(valor) {
         if (!simulationActive) return;
-        let novo = Number(valor);
-        trem.acelerador = novo;
-        document.getElementById("slider-acelerador").value = novo;
-        document.getElementById("lbl-acelerador").innerText = novo + "%";
+        trem.acelerador = Number(valor);
+        document.getElementById("slider-acelerador").value = trem.acelerador;
+        document.getElementById("lbl-acelerador").innerText = trem.acelerador + "%";
         atualizarInterface();
     }
     
@@ -256,62 +324,125 @@
         document.getElementById("gear-mini").innerHTML = trem.marcha;
         document.getElementById("brake-mini").innerHTML = trem.freioAplicado ? "FREIO" : "SOLTO";
         
+        let gradStr = currentGradiente > 0 ? `⬆️ subida ${(currentGradiente*100).toFixed(1)}%` : (currentGradiente < 0 ? `⬇️ descida ${(Math.abs(currentGradiente)*100).toFixed(1)}%` : `⏤ plano`);
+        document.getElementById("lbl-gradiente").innerHTML = gradStr;
+        
         if(vel > 60 && simulationActive) {
             simulationActive = false;
             trem.velocidade = 0;
             document.getElementById("slider-acelerador").disabled = true;
             document.querySelectorAll("button:not(#btn-reset)").forEach(btn => btn.disabled = true);
-            logar("💥 ACIDENTE! Velocidade excedeu 60 km/h. Reinicie.");
+            logar("💥 ACIDENTE! Velocidade > 60 km/h. Descarrilamento.");
             const alertDiv = document.createElement('div');
             alertDiv.className = "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/95 border-2 border-red-700 text-white p-5 rounded-2xl z-[2000] text-center";
-            alertDiv.innerHTML = `<i class="fa-solid fa-skull-crossbones text-5xl mb-2"></i><div class="text-xl font-bold">DESCARILAMENTO</div><div class="text-sm">Velocidade > 60 km/h</div><button onclick="reiniciarSimulacao()" class="mt-4 bg-orange-700 px-5 py-2 rounded-full text-black font-bold">REINICIAR</button>`;
+            alertDiv.innerHTML = `<i class="fa-solid fa-skull-crossbones text-5xl mb-2"></i><div class="text-xl font-bold">DESCARILAMENTO</div><div class="text-sm">Velocidade excessiva na serra</div><button onclick="reiniciarSimulacao()" class="mt-4 bg-orange-700 px-5 py-2 rounded-full text-black font-bold">REINICIAR</button>`;
             document.body.appendChild(alertDiv);
-            atualizarInterface();
         }
     }
     
-    // ================= FÍSICA AJUSTADA (TEMPERATURA RESFRIAMENTO LENTO) =================
+    function atualizarGradiente() {
+        if (currentSegment >= gpxData.length - 1) return;
+        const p1 = gpxData[currentSegment];
+        const p2 = gpxData[currentSegment + 1];
+        const dist = obterDistancia(p1.lat, p1.lon, p2.lat, p2.lon);
+        if (dist < 0.1) return;
+        const deltaEle = p2.ele - p1.ele;
+        currentGradiente = deltaEle / dist;
+    }
+    
+    // ================= FÍSICA REALISTA COM FREIO GRADUAL =================
     function cicloFisica() {
         if (!simulationActive) return;
         
-        // Se a temperatura estiver alta, gera vapor e consome lenha/água
+        atualizarGradiente();
+        
+        // 1. Caldeira e pressão (mesmo de antes, estável)
         if (trem.temperatura > 70) { 
-            // Consumo de lenha mais suave
             trem.lenha = Math.max(0, trem.lenha - 0.22);
-            // Geração de pressão proporcional à temperatura
             if (trem.aguaCaldeira > 2) { 
                 let geracao = (trem.temperatura / 90) + 0.6;
                 trem.pressao = Math.min(trem.pressao + geracao, 195); 
                 trem.aguaCaldeira -= 0.08; 
             }
-            // RESFRIAMENTO MUITO MAIS LENTO: antes 2.8, agora 0.6 por ciclo
             trem.temperatura = Math.max(45, trem.temperatura - 0.6);
         } else { 
-            // Se temperatura baixa, perde pressão gradualmente
             trem.pressao = Math.max(0, trem.pressao - 0.5);
-            // Temperatura não cai abaixo de 45 (mínimo operacional)
             if (trem.temperatura > 45) trem.temperatura = Math.max(45, trem.temperatura - 0.3);
         }
-        
-        // Consumo de pressão pelo acelerador
         if (trem.acelerador > 0) trem.pressao = Math.max(0, trem.pressao - (trem.acelerador * 0.035));
         trem.aguaCaldeira = Math.max(0, Math.min(100, trem.aguaCaldeira));
         
-        // Movimento
-        let podeMover = !(trem.pressao < 38 && trem.acelerador > 4) && !trem.freioAplicado && trem.marcha !== 'NEUTRO' && trem.acelerador > 2;
-        if (podeMover && trem.pressao >= 38) {
-            let atrito = (trem.condicaoTrilho === 'Molhado' && Math.random()>0.68) ? (trem.patinando=true, logar("⚠ Patinagem!"), 0.22) : (trem.patinando=false,1);
-            let sentido = trem.marcha === 'RE' ? -1 : 1;
-            let potencia = (trem.acelerador/100) * (trem.pressao/68) * 52;
-            let alvoVel = sentido * Math.min(95, potencia) * atrito;
-            trem.velocidade += (alvoVel - trem.velocidade) * 0.14;
-            if (Math.abs(trem.velocidade) < 0.6 && Math.abs(alvoVel)>1.5) trem.velocidade += sentido*0.45;
-        } else {
-            let desac = trem.freioAplicado ? 7.2 : 1.8;
-            if (trem.velocidade > 0) trem.velocidade = Math.max(0, trem.velocidade - desac);
-            if (trem.velocidade < 0) trem.velocidade = Math.min(0, trem.velocidade + desac);
+        // 2. Força do motor (apenas se freio solto E marcha engatada E pressão suficiente)
+        let forcaMotor = 0;
+        const podeUsarMotor = !trem.freioAplicado && trem.marcha !== 'NEUTRO' && trem.acelerador > 2 && trem.pressao >= 38;
+        if (podeUsarMotor) {
+            let potenciaBase = 450 * (trem.acelerador / 100) * (trem.pressao / 68);
+            forcaMotor = potenciaBase;
+            if (trem.marcha === 'RE') forcaMotor = -forcaMotor;
         }
-        trem.velocidade = Math.min(95, Math.max(-32, trem.velocidade));
+        
+        // 3. Força gravitacional (sempre presente)
+        let forcaGrav = MASSA_TON * g * currentGradiente;  // kN, positivo = puxa para ré em subida
+        
+        // 4. Força de atrito de rolamento (sempre presente, simula resistência natural)
+        let forcaAtritoBase = 8 * (1 + Math.abs(trem.velocidade)/40);
+        
+        // 5. Força de freio (aplicada gradualmente quando freio acionado)
+        let forcaFreio = 0;
+        if (trem.freioAplicado) {
+            // Freio gradual: força de frenagem proporcional à velocidade (efeito realista) e com limite máximo
+            // Para trem parado, freio não cria força negativa
+            if (Math.abs(trem.velocidade) > 0.1) {
+                // Quanto mais rápido, maior a força de frenagem (até o limite FORCA_FREIO_MAX)
+                forcaFreio = Math.min(FORCA_FREIO_MAX, 12 + 0.8 * Math.abs(trem.velocidade));
+                // Direção contrária ao movimento
+                if (trem.velocidade > 0) forcaFreio = -forcaFreio;
+                else if (trem.velocidade < 0) forcaFreio = +forcaFreio;
+            } else {
+                // Se está praticamente parado, o freio mantém imobilizado (impede qualquer aceleração residual)
+                forcaFreio = 0;
+                // Mas também precisamos garantir que forças externas (gravidade) não movam o trem com freio aplicado
+                // Vamos anular a gravidade e o motor se o freio estiver acionado e velocidade zero
+                if (Math.abs(trem.velocidade) < 0.05) {
+                    // Força resultante será zerada mais adiante
+                }
+            }
+        }
+        
+        // 6. Resultante das forças (em kN)
+        let forcaResultante = forcaMotor - forcaGrav - forcaAtritoBase * Math.sign(trem.velocidade || 1) + forcaFreio;
+        
+        // Se o freio estiver aplicado e a velocidade for muito baixa, evita que o trem comece a se mover por gravidade
+        if (trem.freioAplicado && Math.abs(trem.velocidade) < 0.2 && Math.abs(forcaResultante) < FORCA_FREIO_MAX/2) {
+            forcaResultante = 0;
+            trem.velocidade = 0;
+        }
+        
+        // Aceleração a = F / m  (m em toneladas, F em kN -> a = F / M em m/s²)
+        let aceleracao = forcaResultante / MASSA_TON;
+        // Limitar aceleração/desaceleração máxima para estabilidade
+        aceleracao = Math.min(2.5, Math.max(-3.0, aceleracao));
+        
+        // Atualiza velocidade
+        let novaVelocidade = trem.velocidade + aceleracao * 0.98; // 0.98s ~ intervalo do ciclo
+        // Pequena inércia para evitar oscilações
+        trem.velocidade = novaVelocidade;
+        
+        // Resistência aerodinâmica extra (para alta velocidade)
+        let resistencia = 0.018 * Math.abs(trem.velocidade) * trem.velocidade;
+        if (trem.velocidade > 0) trem.velocidade = Math.max(0, trem.velocidade - resistencia * 0.1);
+        else if (trem.velocidade < 0) trem.velocidade = Math.min(0, trem.velocidade + resistencia * 0.1);
+        
+        // Limites de velocidade (60 km/h para frente, 32 km/h para ré)
+        if (trem.velocidade > 60) trem.velocidade = 60;
+        if (trem.velocidade < -32) trem.velocidade = -32;
+        
+        // Patinação (apenas em aceleração forte e trilho molhado)
+        if (Math.abs(aceleracao) > 2.2 && trem.condicaoTrilho === 'Molhado' && Math.random()<0.3 && !trem.freioAplicado) {
+            trem.patinando = true;
+            logar("⚠ Rodas patinando na rampa!");
+        } else if (Math.random()<0.1) trem.patinando = false;
+        
         atualizarInterface();
         controlarAnimacaoGPS();
     }
@@ -332,14 +463,18 @@
         if(!lastTimestampAnim) lastTimestampAnim=now;
         let delta = Math.min((now-lastTimestampAnim)/1000,0.07);
         lastTimestampAnim=now;
-        let metrosAndados = (Math.abs(trem.velocidade)/3.6) * delta;
-        totalDistM += metrosAndados;
+        let metrosAndados = (trem.velocidade / 3.6) * delta;
+        totalDistM += Math.abs(metrosAndados);
         segProgress += metrosAndados;
         let segLen = obterDistancia(gpxData[currentSegment].lat, gpxData[currentSegment].lon, gpxData[currentSegment+1].lat, gpxData[currentSegment+1].lon);
         while(segProgress >= segLen && currentSegment < gpxData.length-2){
             segProgress -= segLen;
             currentSegment++;
             segLen = obterDistancia(gpxData[currentSegment].lat, gpxData[currentSegment].lon, gpxData[currentSegment+1].lat, gpxData[currentSegment+1].lon);
+        }
+        while(segProgress < 0 && currentSegment > 0){
+            currentSegment--;
+            segProgress += obterDistancia(gpxData[currentSegment].lat, gpxData[currentSegment].lon, gpxData[currentSegment+1].lat, gpxData[currentSegment+1].lon);
         }
         if(currentSegment >= gpxData.length-1){ finalizarTrajeto(); return; }
         const factor = segProgress/segLen;
@@ -354,16 +489,16 @@
         document.getElementById("gps-distancia").innerText = distKm;
         animFrame = requestAnimationFrame(gpsLoop);
     }
-    function finalizarTrajeto(){ isPlaying=false; cancelAnimationFrame(animFrame); logar("🏁 Destino alcançado"); trem.velocidade=0; atualizarInterface(); }
+    function finalizarTrajeto(){ isPlaying=false; cancelAnimationFrame(animFrame); logar("🏁 Destino alcançado!"); trem.velocidade=0; atualizarInterface(); }
     
     // ================= COMANDOS =================
     function adicionarLenha(){ if(!simulationActive) return; trem.lenha=Math.min(100, trem.lenha+20); trem.temperatura = Math.min(440, trem.temperatura + 45); logar("🔥 Lenha adicionada (+45°C)."); atualizarInterface(); }
     function abastecerAgua(){ if(!simulationActive) return; if(Math.abs(trem.velocidade)>1){ logar("🚫 Movimento impede reabastecimento."); return;} trem.aguaReservatorio=2500; logar("💧 Tender reabastecido."); atualizarInterface(); }
     function acionarInjetor(){ if(!simulationActive) return; if(trem.aguaReservatorio>=130){ trem.aguaReservatorio-=130; trem.aguaCaldeira=Math.min(100,trem.aguaCaldeira+14); trem.temperatura=Math.max(40,trem.temperatura-15); trem.pressao=Math.max(0,trem.pressao-5); logar("💨 Injetor acionado."); }else logar("❌ Água insuficiente."); atualizarInterface(); }
     function mudarMarcha(dir){ if(!simulationActive) return; trem.marcha=dir; logar(`Reversor: ${dir}`); atualizarInterface();}
-    function alternarFreio(){ if(!simulationActive) return; trem.freioAplicado=!trem.freioAplicado; logar(trem.freioAplicado?"Freio acionado":"Freio liberado"); atualizarInterface();}
-    function tocarSinal(tipo){ if(!simulationActive) return; logar(tipo==='apito'?"🚂 Apito ecoa!":"🔔 Sino ressoa."); }
-    function jogarAreia(){ if(!simulationActive) return; trem.patinando=false; logar("⏳ Areia nos trilhos."); atualizarInterface();}
+    function alternarFreio(){ if(!simulationActive) return; trem.freioAplicado=!trem.freioAplicado; logar(trem.freioAplicado ? "🛑 Freio aplicado (parada gradual)" : "🟢 Freio liberado"); atualizarInterface();}
+    function tocarSinal(tipo){ if(!simulationActive) return; logar(tipo==='apito'?"🚂 Apito ecoa na serra!":"🔔 Sino ressoa."); }
+    function jogarAreia(){ if(!simulationActive) return; trem.patinando=false; logar("⏳ Areia jogada nos trilhos."); atualizarInterface();}
     function reiniciarSimulacao() {
         simulationActive = true;
         Object.assign(trem, { aguaReservatorio:2500, aguaCaldeira:55, lenha:100, temperatura:200, pressao:60, marcha:'NEUTRO', freioAplicado:true, acelerador:0, velocidade:0, patinando:false, condicaoTrilho:'Seco' });
@@ -376,7 +511,8 @@
         document.querySelectorAll("button").forEach(btn => { btn.disabled = false; btn.classList.remove("opacity-50"); });
         document.getElementById("lbl-acelerador").innerText = "0%";
         document.getElementById("gps-distancia").innerHTML = "0 m";
-        logar("🔄 SIMULAÇÃO REINICIADA. Temperatura com resfriamento lento. Solte o freio e acelere.");
+        logar("🔄 Simulação reiniciada. Freio aplicado (parada gradual). Solte o freio para se mover.");
+        atualizarGradiente();
         atualizarInterface();
         document.querySelectorAll('.fixed.bg-black\\/95').forEach(el=>el.remove());
     }
@@ -385,13 +521,14 @@
     slider.addEventListener("input", (e) => atualizarManeco(e.target.value));
     
     setInterval(cicloFisica, 980);
-    setInterval(()=>{ if(!simulationActive) return; if(Math.random()<0.28){ let clima = Math.random()>0.7 ? 'Molhado' : 'Seco'; if(clima !== trem.condicaoTrilho){ trem.condicaoTrilho=clima; logar(clima==='Molhado'?"🌧 Trilhos molhados!":"☀ Trilhos secos."); atualizarInterface(); } } }, 24000);
+    setInterval(()=>{ if(!simulationActive) return; if(Math.random()<0.28){ let clima = Math.random()>0.7 ? 'Molhado' : 'Seco'; if(clima !== trem.condicaoTrilho){ trem.condicaoTrilho=clima; logar(clima==='Molhado'?"🌧 Trilhos molhados (menor aderência)!":"☀ Trilhos secos."); atualizarInterface(); } } }, 24000);
     
     document.getElementById('btn-reset').addEventListener('click', reiniciarSimulacao);
     window.adicionarLenha=adicionarLenha; window.abastecerAgua=abastecerAgua; window.acionarInjetor=acionarInjetor; window.mudarMarcha=mudarMarcha;
     window.alternarFreio=alternarFreio; window.tocarSinal=tocarSinal; window.jogarAreia=jogarAreia; window.reiniciarSimulacao=reiniciarSimulacao;
+    atualizarGradiente();
     atualizarInterface(); 
-    logar("✅ Temperatura agora esfria lentamente (0.6°C/ciclo). Maneco livre. Aproveite!");
+    logar("✅ Freio gradual realista: ao acionar, o trem reduz a velocidade progressivamente até parar.");
 </script>
 </body>
 </html>
